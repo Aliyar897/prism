@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python manage.py check)",
+      "Bash(python manage.py migrate accounts)",
+      "Bash(venv\\\\Scripts\\\\python.exe manage.py migrate)",
+      "Bash(pip show *)",
+      "Bash(findstr /i \"version\")"
+    ]
+  }
+}
