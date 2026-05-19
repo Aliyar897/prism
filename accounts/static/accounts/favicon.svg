@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="7" fill="#635BFF"/>
+
+  <!-- Large 4-pointed star — centre (13, 16), outer r=7, inner r=1.8 -->
+  <!-- Arms: N(13,9) E(20,16) S(13,23) W(6,16) | Waist points at 45° -->
+  <polygon fill="white"
+    points="13,9 14.3,14.7 20,16 14.3,17.3 13,23 11.7,17.3 6,16 11.7,14.7"/>
+
+  <!-- Small 4-pointed star — centre (23, 9), outer r=3, inner r=0.8 -->
+  <polygon fill="white" opacity="0.9"
+    points="23,6 23.6,8.4 26,9 23.6,9.6 23,12 22.4,9.6 20,9 22.4,8.4"/>
+
+  <!-- Small 4-pointed star — centre (23, 23), outer r=3, inner r=0.8 -->
+  <polygon fill="white" opacity="0.9"
+    points="23,20 23.6,22.4 26,23 23.6,23.6 23,26 22.4,23.6 20,23 22.4,22.4"/>
+</svg>

@@ -1,0 +1,90 @@
+
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #F7F5F0;
+  margin: 0;
+}
+
+.auth-wrap {
+  display: flex;
+  min-height: 100vh;
+}
+
+.auth-left {
+  width: 420px;
+  padding: 50px;
+  background: white;
+}
+
+.auth-right {
+  flex: 1;
+  background: #EEF0FF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-logo {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+
+.auth-logo-mark {
+  width: 32px;
+  height: 32px;
+  background: #5B47E0;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.auth-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 26px;
+}
+
+.auth-subtitle {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 12px;
+  background: #5B47E0;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.auth-divider {
+  text-align: center;
+  margin: 20px 0;
+  color: #aaa;
+}
+
+.social-btn {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
+
+.error {
+  color: red;
+  margin-bottom: 10px;
+}

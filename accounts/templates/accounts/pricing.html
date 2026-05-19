@@ -1,0 +1,650 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prism — Pricing</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <link rel="icon" type="image/svg+xml" href="/static/accounts/favicon.svg">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #09090B;
+      --surface:   #111113;
+      --surface2:  #18181B;
+      --border:    rgba(255,255,255,0.07);
+      --border-md: rgba(255,255,255,0.12);
+      --text:      #FAFAFA;
+      --text-2:    #A1A1AA;
+      --text-3:    #52525B;
+      --accent:    #635BFF;
+      --accent-dk: #4F48D6;
+      --indigo-dk: #1E1B4B;
+      --green:     #4ade80;
+    }
+
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    a { text-decoration: none; color: inherit; }
+
+    /* ── NAV ── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 48px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: rgba(9,9,11,0.88);
+      backdrop-filter: blur(14px);
+      z-index: 50;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 17px;
+      color: var(--text);
+    }
+
+    .nav-logo-mark {
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
+      background: var(--accent);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+    }
+
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+
+    .nav-link {
+      font-size: 14px;
+      color: var(--text-2);
+      padding: 7px 14px;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .nav-link:hover { color: var(--accent); border-color: var(--accent); }
+
+    .nav-btn {
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      background: var(--accent);
+      padding: 8px 18px;
+      border-radius: 8px;
+      transition: background 0.15s, transform 0.15s;
+    }
+    .nav-btn:hover { background: var(--accent-dk); transform: translateY(-1px); }
+
+    /* ── HERO ── */
+    .hero {
+      text-align: center;
+      padding: 80px 24px 60px;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      background: rgba(99,91,255,0.12);
+      border: 1px solid rgba(99,91,255,0.25);
+      border-radius: 20px;
+      padding: 4px 14px;
+      margin-bottom: 24px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .hero-title {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: clamp(36px, 6vw, 56px);
+      font-weight: 400;
+      line-height: 1.15;
+      margin-bottom: 20px;
+      color: var(--text);
+    }
+
+    .hero-sub {
+      font-size: 17px;
+      color: var(--text-2);
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    /* ── PLAN CARDS ── */
+    .plans-wrap {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 0 24px 72px;
+      max-width: 880px;
+      margin: 0 auto;
+    }
+
+    .plan-card {
+      flex: 1 1 320px;
+      max-width: 380px;
+      border-radius: 20px;
+      padding: 36px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      position: relative;
+    }
+
+    .plan-card-free {
+      background: var(--surface);
+      border: 1.5px solid var(--border-md);
+      color: var(--text);
+    }
+
+    .plan-card-pro {
+      background: var(--indigo-dk);
+      border: 1.5px solid rgba(139,92,246,0.35);
+      color: #fff;
+      box-shadow: 0 0 0 1px rgba(99,91,255,0.15), 0 24px 64px rgba(99,91,255,0.18);
+    }
+
+    .plan-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 3px 12px;
+      border-radius: 20px;
+      margin-bottom: 24px;
+      width: fit-content;
+    }
+
+    .badge-free {
+      background: rgba(255,255,255,0.07);
+      color: var(--text-2);
+      border: 1px solid var(--border-md);
+    }
+
+    .badge-pro {
+      background: rgba(139,92,246,0.2);
+      color: #C4B5FD;
+      border: 1px solid rgba(139,92,246,0.35);
+    }
+
+    .plan-name {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
+      opacity: 0.5;
+    }
+
+    .plan-price {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 52px;
+      font-weight: 400;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .plan-price sup {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 22px;
+      font-weight: 600;
+      vertical-align: super;
+      line-height: 1;
+    }
+
+    .plan-period {
+      font-size: 13px;
+      color: inherit;
+      opacity: 0.5;
+      margin-bottom: 28px;
+    }
+
+    .plan-divider {
+      height: 1px;
+      background: currentColor;
+      opacity: 0.08;
+      margin-bottom: 24px;
+    }
+
+    .plan-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 32px;
+      flex: 1;
+    }
+
+    .plan-features li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .feat-icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .feat-check {
+      background: rgba(74,222,128,0.15);
+      color: var(--green);
+    }
+
+    .feat-dash {
+      background: rgba(255,255,255,0.06);
+      color: var(--text-3);
+    }
+
+    .feat-check-pro {
+      background: rgba(167,139,250,0.2);
+      color: #C4B5FD;
+    }
+
+    .feat-text { flex: 1; }
+    .feat-text .muted { opacity: 0.35; }
+
+    .plan-cta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 24px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      text-align: center;
+      transition: all 0.18s;
+    }
+
+    .cta-free {
+      background: rgba(255,255,255,0.07);
+      color: var(--text);
+      border: 1px solid var(--border-md);
+    }
+    .cta-free:hover { background: rgba(255,255,255,0.11); }
+
+    .cta-pro {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(99,91,255,0.4);
+    }
+    .cta-pro:hover { background: var(--accent-dk); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(99,91,255,0.45); }
+
+    /* ── WHY PRO CALLOUTS ── */
+    .section {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 0 24px 72px;
+    }
+
+    .section-title {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 30px;
+      font-weight: 400;
+      text-align: center;
+      margin-bottom: 40px;
+      color: var(--text);
+    }
+
+    .callouts-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .callout-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 24px;
+      transition: border-color 0.2s;
+    }
+    .callout-card:hover { border-color: rgba(99,91,255,0.3); }
+
+    .callout-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(99,91,255,0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      color: #A78BFA;
+      margin-bottom: 16px;
+    }
+
+    .callout-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .callout-desc {
+      font-size: 13px;
+      color: var(--text-2);
+      line-height: 1.6;
+    }
+
+    /* ── FAQ ── */
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    .faq-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px 24px;
+      transition: border-color 0.2s;
+    }
+    .faq-item:hover { border-color: rgba(99,91,255,0.25); }
+
+    .faq-q {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+
+    .faq-a {
+      font-size: 14px;
+      color: var(--text-2);
+      line-height: 1.65;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 20px;
+    }
+
+    .footer-links a {
+      font-size: 13px;
+      color: var(--text-3);
+      transition: color 0.15s;
+    }
+    .footer-links a:hover { color: var(--text-2); }
+
+    .footer-copy {
+      font-size: 13px;
+      color: var(--text-3);
+      width: 100%;
+      text-align: center;
+      margin-top: 4px;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .callouts-grid { grid-template-columns: 1fr; }
+      nav { padding: 16px 20px; }
+      .plans-wrap { padding: 0 16px 56px; }
+      .section { padding: 0 16px 56px; }
+      footer { padding: 24px 20px; flex-direction: column; align-items: center; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <a href="{% url 'landing' %}" class="nav-logo">
+    <div class="nav-logo-mark"><i class="ti ti-sparkles"></i></div>
+    Prism
+  </a>
+  <div class="nav-right">
+    {% if user.is_authenticated %}
+      <a href="{% url 'dashboard' %}" class="nav-link">Dashboard</a>
+      {% if user.profile.plan != 'pro' %}
+        <a href="{% url 'stripe_checkout' %}" class="nav-btn">Upgrade to Pro</a>
+      {% endif %}
+    {% else %}
+      <a href="{% url 'account_login' %}" class="nav-link">Sign in</a>
+      <a href="{% url 'account_signup' %}" class="nav-btn">Get started free</a>
+    {% endif %}
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="hero-eyebrow"><i class="ti ti-sparkles"></i> Pricing</div>
+  <h1 class="hero-title">Simple pricing for<br>serious creators.</h1>
+  <p class="hero-sub">Start free. Upgrade when you're ready to unlock every persona, unlimited links, and your full Brand Kit.</p>
+</div>
+
+<!-- ── PLAN CARDS ── -->
+<div class="plans-wrap">
+
+  <!-- Free -->
+  <div class="plan-card plan-card-free">
+    <div class="plan-badge badge-free">Free</div>
+    <div class="plan-name">Free forever</div>
+    <div class="plan-price"><sup>$</sup>0</div>
+    <div class="plan-period">No credit card required</div>
+    <div class="plan-divider"></div>
+    <ul class="plan-features">
+      <li>
+        <div class="feat-icon feat-check"><i class="ti ti-check"></i></div>
+        <span class="feat-text">1 active persona</span>
+      </li>
+      <li>
+        <div class="feat-icon feat-check"><i class="ti ti-check"></i></div>
+        <span class="feat-text">Up to 3 links (Fan mode only)</span>
+      </li>
+      <li>
+        <div class="feat-icon feat-check"><i class="ti ti-check"></i></div>
+        <span class="feat-text">Smart audience detection</span>
+      </li>
+      <li>
+        <div class="feat-icon feat-check"><i class="ti ti-check"></i></div>
+        <span class="feat-text">Public profile page</span>
+      </li>
+      <li>
+        <div class="feat-icon feat-dash"><i class="ti ti-minus"></i></div>
+        <span class="feat-text muted">Multiple simultaneous personas</span>
+      </li>
+      <li>
+        <div class="feat-icon feat-dash"><i class="ti ti-minus"></i></div>
+        <span class="feat-text muted">Unlimited links</span>
+      </li>
+      <li>
+        <div class="feat-icon feat-dash"><i class="ti ti-minus"></i></div>
+        <span class="feat-text muted">Brand Kit (niche, collabs, past brands)</span>
+      </li>
+      <li>
+        <div class="feat-icon feat-dash"><i class="ti ti-minus"></i></div>
+        <span class="feat-text muted">Media Kit Stats</span>
+      </li>
+    </ul>
+    {% if user.is_authenticated %}
+      <a href="{% url 'dashboard' %}" class="plan-cta cta-free">Go to Dashboard</a>
+    {% else %}
+      <a href="{% url 'account_signup' %}" class="plan-cta cta-free">Get started free</a>
+    {% endif %}
+  </div>
+
+  <!-- Pro -->
+  <div class="plan-card plan-card-pro">
+    <div class="plan-badge badge-pro"><i class="ti ti-bolt" style="font-size:11px"></i> Most popular</div>
+    <div class="plan-name">Pro</div>
+    <div class="plan-price"><sup>$</sup>9</div>
+    <div class="plan-period">per month · cancel anytime</div>
+    <div class="plan-divider"></div>
+    <ul class="plan-features">
+      <li>
+        <div class="feat-icon feat-check-pro"><i class="ti ti-check"></i></div>
+        <span class="feat-text">All 3 personas active simultaneously</span>
+      </li>
+      <li>
+        <div class="feat-icon feat-check-pro"><i class="ti ti-check"></i></div>
+        <span class="feat-text">Unlimited links per persona</span>
+      </li>
+      <li>
+        <div class="feat-icon feat-check-pro"><i class="ti ti-check"></i></div>
+        <span class="feat-text">Smart audience detection</span>
+      </li>
+      <li>
+        <div class="feat-icon feat-check-pro"><i class="ti ti-check"></i></div>
+        <span class="feat-text">Public profile page</span>
+      </li>
+      <li>
+        <div class="feat-icon feat-check-pro"><i class="ti ti-check"></i></div>
+        <span class="feat-text">Full Brand Kit — niche tags, collab formats &amp; past partners</span>
+      </li>
+      <li>
+        <div class="feat-icon feat-check-pro"><i class="ti ti-check"></i></div>
+        <span class="feat-text">Media Kit Stats (engagement, reach, growth)</span>
+      </li>
+      <li>
+        <div class="feat-icon feat-check-pro"><i class="ti ti-check"></i></div>
+        <span class="feat-text">Priority support</span>
+      </li>
+      <li>
+        <div class="feat-icon feat-check-pro"><i class="ti ti-check"></i></div>
+        <span class="feat-text">Early access to new features</span>
+      </li>
+    </ul>
+    {% if user.is_authenticated and user.profile.plan == 'pro' %}
+      <a href="{% url 'dashboard' %}" class="plan-cta cta-pro">You're on Pro ✓</a>
+    {% else %}
+      <a href="{% url 'stripe_checkout' %}" class="plan-cta cta-pro">Upgrade to Pro →</a>
+    {% endif %}
+  </div>
+
+</div>
+
+<!-- ── WHY PRO CALLOUTS ── -->
+<div class="section">
+  <div class="section-title">Why creators upgrade to Pro</div>
+  <div class="callouts-grid">
+
+    <div class="callout-card">
+      <div class="callout-icon"><i class="ti ti-users"></i></div>
+      <div class="callout-title">Three audiences, one link</div>
+      <div class="callout-desc">Run your Fan, Brand, and Professional personas simultaneously. Each visitor sees the version of you built for them — automatically.</div>
+    </div>
+
+    <div class="callout-card">
+      <div class="callout-icon"><i class="ti ti-briefcase"></i></div>
+      <div class="callout-title">Win more brand deals</div>
+      <div class="callout-desc">Showcase your niche, collaboration formats, and past brand partners directly on your profile. Give brands everything they need to say yes.</div>
+    </div>
+
+    <div class="callout-card">
+      <div class="callout-icon"><i class="ti ti-chart-bar"></i></div>
+      <div class="callout-title">Show your reach</div>
+      <div class="callout-desc">Add subscriber counts and engagement rates to your social links. Make your numbers impossible to ignore when pitching to sponsors.</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── FAQ ── -->
+<div class="section">
+  <div class="section-title">Frequently asked questions</div>
+  <div class="faq-list">
+
+    <div class="faq-item">
+      <div class="faq-q">Can I switch from Free to Pro at any time?</div>
+      <div class="faq-a">Yes — upgrade whenever you're ready. Your existing links and persona settings carry over instantly. No re-setup needed.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">What happens to my data if I cancel Pro?</div>
+      <div class="faq-a">Nothing is deleted. Your Brand Kit and extra links are preserved, but only one persona will be shown publicly until you re-upgrade. You can export your data anytime.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Is there a free trial for Pro?</div>
+      <div class="faq-a">The Free plan gives you a full feel for Prism with no time limit. Pro features are available the moment you upgrade — no trial period or hidden activation steps.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">How does audience detection work?</div>
+      <div class="faq-a">Prism reads signals like referrer URL, device type, and time of day to intelligently serve the most relevant persona to each visitor — all without any extra setup from you.</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <a href="{% url 'landing' %}" class="footer-logo">
+    <div class="nav-logo-mark" style="width:24px;height:24px;font-size:12px;border-radius:7px"><i class="ti ti-sparkles"></i></div>
+    Prism
+  </a>
+  <div class="footer-links">
+    <a href="{% url 'account_login' %}">Sign in</a>
+    <a href="{% url 'account_signup' %}">Sign up</a>
+    <a href="{% url 'pricing' %}">Pricing</a>
+  </div>
+  <p class="footer-copy">&copy; {% now "Y" %} Prism · Built for creators who are more than one thing</p>
+</footer>
+
+</body>
+</html>

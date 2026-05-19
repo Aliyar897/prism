@@ -1,0 +1,230 @@
+{% load static %}
+{% load socialaccount %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prism — Sign in</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <link rel="stylesheet" href="{% static 'accounts/css/auth.css' %}">
+  <style>
+    .auth-right {
+      background: #F4F2EE;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .auth-right::before {
+      content: '';
+      position: absolute; top: -120px; left: 50%;
+      transform: translateX(-50%);
+      width: 500px; height: 500px;
+      background: radial-gradient(ellipse, rgba(99,91,255,.10) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .ar-wrap { max-width: 400px; width: 100%; position: relative; z-index: 1; }
+
+    .ar-eyebrow {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 13px; border-radius: 20px;
+      background: #fff; border: 1px solid rgba(0,0,0,0.08);
+      font-size: 12px; font-weight: 600; color: #635BFF;
+      margin-bottom: 22px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .ar-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 36px; color: #18160F; line-height: 1.15; margin-bottom: 10px;
+    }
+    .ar-title em { color: #635BFF; font-style: italic; }
+    .ar-sub {
+      font-size: 14px; color: #6B6860; line-height: 1.65; margin-bottom: 28px;
+    }
+    .ar-demo {
+      background: #fff; border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 16px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
+      overflow: hidden; margin-bottom: 24px;
+    }
+    .ar-demo-bar {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 14px; background: #F9F8F6;
+      border-bottom: 1px solid rgba(0,0,0,0.07);
+    }
+    .ar-dots { display: flex; gap: 5px; }
+    .ar-dot  { width: 9px; height: 9px; border-radius: 50%; }
+    .ar-demo-url {
+      flex: 1; text-align: center; font-size: 11px; color: #AAA8A3; font-weight: 500;
+      background: #F4F2EE; border-radius: 5px; padding: 3px 10px; margin: 0 8px;
+    }
+    .ar-demo-visitors { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .ar-demo-label {
+      font-size: 9px; font-weight: 700; letter-spacing: .10em;
+      text-transform: uppercase; color: #AAA8A3; margin-bottom: 2px;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .ar-live-dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: #15A366; animation: ar-pulse 1.8s infinite;
+    }
+    @keyframes ar-pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+    .ar-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 12px; border-radius: 10px;
+    }
+    .ar-row-fan   { background: #FFF5F5; }
+    .ar-row-brand { background: #F0F0FF; }
+    .ar-row-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; flex-shrink: 0;
+    }
+    .ar-row-fan   .ar-row-icon { background: #FFE4E4; color: #FF6B6B; }
+    .ar-row-brand .ar-row-icon { background: #E4E4FF; color: #635BFF; }
+    .ar-row-info { flex: 1; }
+    .ar-row-name { font-size: 12px; font-weight: 600; color: #18160F; }
+    .ar-row-sub  { font-size: 10px; color: #AAA8A3; margin-top: 1px; }
+    .ar-badge {
+      font-size: 10px; font-weight: 700;
+      padding: 3px 9px; border-radius: 20px; flex-shrink: 0;
+    }
+    .ar-row-fan   .ar-badge { background: #FFE4E4; color: #FF6B6B; }
+    .ar-row-brand .ar-badge { background: #E4E4FF; color: #635BFF; }
+    .ar-features { display: flex; flex-wrap: wrap; gap: 8px; }
+    .ar-feat {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 12px; border-radius: 20px;
+      background: #fff; border: 1px solid rgba(0,0,0,0.08);
+      font-size: 12px; font-weight: 500; color: #6B6860;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .ar-feat i { color: #635BFF; font-size: 13px; }
+  </style>
+  <link rel="icon" type="image/svg+xml" href="/static/accounts/favicon.svg">
+</head>
+
+<body>
+
+<div class="auth-wrap">
+
+  <!-- LEFT -->
+  <div class="auth-left">
+
+    <div class="auth-logo">
+      <div class="auth-logo-mark"><i class="ti ti-sparkles"></i></div>
+      <div class="auth-logo-name">Prism</div>
+    </div>
+
+    <h1 class="auth-title">Welcome back</h1>
+    <p class="auth-subtitle">Sign in to your Prism account.</p>
+
+    <!-- Google -->
+    <a href="{% provider_login_url 'google' %}" class="social-btn">
+      <svg class="social-icon" viewBox="0 0 18 18">
+        <path fill="#4285F4" d="M17.64 9.2a10.34 10.34 0 0 0-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92a8.78 8.78 0 0 0 2.68-6.62Z"/>
+        <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26a5.4 5.4 0 0 1-8.05-2.84H.96v2.33A9 9 0 0 0 9 18Z"/>
+        <path fill="#FBBC05" d="M2.99 10.72A5.41 5.41 0 0 1 2.99 7.28V4.95H.96a9 9 0 0 0 0 8.1Z"/>
+        <path fill="#EA4335" d="M9 3.58a4.86 4.86 0 0 1 3.44 1.33l2.58-2.58A9 9 0 0 0 9 .2a8.78 8.78 0 0 0-7.66 4.72l2.92 2.26A5.4 5.4 0 0 1 9 3.58Z"/>
+      </svg>
+      Continue with Google
+    </a>
+
+    <div class="auth-divider"><span>or</span></div>
+
+    {% if form.errors %}
+      <div class="error-msg">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="error-msg">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="POST">
+      {% csrf_token %}
+
+      <div class="form-group">
+        <label class="form-label">Email address</label>
+        <input class="form-input" type="email" name="login" placeholder="alex@example.com" required autofocus>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" style="display:flex;justify-content:space-between;">
+          Password
+          <a href="{% url 'account_reset_password' %}" style="font-weight:400;font-size:12px;">Forgot password?</a>
+        </label>
+        <input class="form-input" type="password" name="password" placeholder="Your password" required>
+      </div>
+
+      <button type="submit" class="btn-primary">
+        Sign in <i class="ti ti-arrow-right"></i>
+      </button>
+    </form>
+
+    <p class="auth-switch">
+      Don't have an account? <a href="{% url 'account_signup' %}">Sign up free</a>
+    </p>
+
+  </div>
+
+  <!-- RIGHT -->
+  <div class="auth-right">
+    <div class="ar-wrap">
+
+      <div class="ar-eyebrow">
+        <i class="ti ti-sparkles" style="font-size:12px"></i> Smart link-in-bio
+      </div>
+
+      <h2 class="ar-title">Welcome back.<br><em>Your audience<br>is waiting.</em></h2>
+      <p class="ar-sub">Your Prism page is live. Every visitor is automatically shown the version of you that's most relevant to them.</p>
+
+      <div class="ar-demo">
+        <div class="ar-demo-bar">
+          <div class="ar-dots">
+            <div class="ar-dot" style="background:#FF5F57"></div>
+            <div class="ar-dot" style="background:#FFBD2E"></div>
+            <div class="ar-dot" style="background:#28CA41"></div>
+          </div>
+          <div class="ar-demo-url">prism.so/yourname</div>
+        </div>
+        <div class="ar-demo-visitors">
+          <div class="ar-demo-label">
+            <span class="ar-live-dot"></span> Visitors right now
+          </div>
+          <div class="ar-row ar-row-fan">
+            <div class="ar-row-icon"><i class="ti ti-heart"></i></div>
+            <div class="ar-row-info">
+              <div class="ar-row-name">Fan from TikTok · mobile</div>
+              <div class="ar-row-sub">Sees your fan page — bio, links, content</div>
+            </div>
+            <span class="ar-badge">Fan mode</span>
+          </div>
+          <div class="ar-row ar-row-brand">
+            <div class="ar-row-icon"><i class="ti ti-briefcase"></i></div>
+            <div class="ar-row-info">
+              <div class="ar-row-name">Brand manager · LinkedIn</div>
+              <div class="ar-row-sub">Sees your media kit, stats &amp; collabs</div>
+            </div>
+            <span class="ar-badge">Brand mode</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ar-features">
+        <div class="ar-feat"><i class="ti ti-cpu"></i> Smart detection</div>
+        <div class="ar-feat"><i class="ti ti-writing"></i> AI bio writer</div>
+        <div class="ar-feat"><i class="ti ti-chart-pie"></i> Brand media kit</div>
+        <div class="ar-feat"><i class="ti ti-sparkles"></i> Free to start</div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

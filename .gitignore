@@ -1,0 +1,57 @@
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+claude
+C:\Users\Ali Yar\Documents\prism\prism\.claude
+
+# ── Virtual environment ───────────────────────────────────────────────────────
+venv/
+env/
+.env/
+.venv/
+
+# ── Django ────────────────────────────────────────────────────────────────────
+*.sqlite3
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+
+# ── Environment variables ─────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Static files (collected) ──────────────────────────────────────────────────
+staticfiles/
+static_root/
+
+# ── Stripe CLI binary ─────────────────────────────────────────────────────────
+stripe.exe
+stripe
+
+# ── IDE / Editor ─────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── OS ────────────────────────────────────────────────────────────────────────
+.DS_Store
+desktop.ini
+
+# ── Misc ──────────────────────────────────────────────────────────────────────
+*.bak
+*.tmp
+*.orig

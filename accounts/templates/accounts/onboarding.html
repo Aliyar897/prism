@@ -1,0 +1,466 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Prism — Onboarding</title>
+
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #F7F5F0;
+  --surface: #FFFFFF;
+  --border: rgba(0,0,0,0.08);
+  --text: #1A1814;
+  --text-2: #6B6760;
+  --accent: #5B47E0;
+  --accent-light: #EEF0FF;
+  --radius: 12px;
+}
+
+* { box-sizing: border-box; margin:0; padding:0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.container {
+  width: 420px;
+  padding: 20px 0;
+}
+
+/* ── Progress ── */
+.progress {
+  height: 4px;
+  background: #ddd;
+  margin-bottom: 30px;
+  border-radius: 10px;
+  display: flex;
+  gap: 6px;
+}
+
+.progress-segment {
+  flex: 1;
+  height: 100%;
+  border-radius: 10px;
+  background: #ddd;
+  transition: background 0.4s;
+}
+
+.progress-segment.done { background: var(--accent); }
+
+/* ── Steps ── */
+.step { display: none; }
+.step.active { display: block; }
+
+/* ── Slide animation ── */
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.step.active { animation: slideIn 0.3s ease; }
+
+h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 28px;
+  margin-bottom: 10px;
+  color: var(--text);
+}
+
+p.sub {
+  color: var(--text-2);
+  font-size: 14px;
+  margin-bottom: 25px;
+}
+
+/* ── Goal options ── */
+.option {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.option:hover { border-color: var(--accent); }
+
+.option.active {
+  border: 2px solid var(--accent);
+  background: var(--accent-light);
+}
+
+.option-title { font-weight: 600; font-size: 14px; }
+.option-desc  { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+
+.icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.creator  { background: #C4FF00; }
+.business { background: #5B2E91; }
+.personal { background: #FF3B3B; }
+
+/* ── Platform grid ── */
+.platform-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.platform-tile {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 8px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  user-select: none;
+}
+
+.platform-tile:hover { border-color: var(--accent); }
+
+.platform-tile.active {
+  border: 2px solid var(--accent);
+  background: var(--accent-light);
+}
+
+.platform-tile svg,
+.platform-tile img {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+}
+
+.platform-name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  text-align: center;
+}
+
+.select-hint {
+  font-size: 12px;
+  color: var(--text-2);
+  margin-bottom: 16px;
+}
+
+/* ── Buttons ── */
+.btn {
+  width: 100%;
+  margin-top: 15px;
+  padding: 13px;
+  border: none;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  background: #ddd;
+  color: #999;
+  cursor: not-allowed;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn.active {
+  background: var(--accent);
+  color: white;
+  cursor: pointer;
+}
+
+.btn-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.btn-back {
+  width: auto;
+  padding: 13px 20px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-2);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  flex-shrink: 0;
+}
+
+.btn-back:hover { border-color: var(--accent); color: var(--accent); }
+</style>
+  <link rel="icon" type="image/svg+xml" href="/static/accounts/favicon.svg">
+</head>
+
+<body>
+<div class="container">
+
+  <!-- Progress bar: 2 segments -->
+  <div class="progress">
+    <div class="progress-segment done" id="seg1"></div>
+    <div class="progress-segment" id="seg2"></div>
+  </div>
+
+  <!-- ═══════════════════════════════
+       STEP 1 — Goal
+  ═══════════════════════════════ -->
+  <div class="step active" id="step1">
+    <h1>Which best describes your goal?</h1>
+    <p class="sub">This helps us personalise your experience.</p>
+
+    <div class="option" onclick="selectGoal(this, 'creator')">
+      <div>
+        <div class="option-title">Creator</div>
+        <div class="option-desc">Build a following and monetise your audience</div>
+      </div>
+      <div class="icon creator">🎨</div>
+    </div>
+
+    <div class="option" onclick="selectGoal(this, 'business')">
+      <div>
+        <div class="option-title">Business</div>
+        <div class="option-desc">Grow your business and reach customers</div>
+      </div>
+      <div class="icon business">🏢</div>
+    </div>
+
+    <div class="option" onclick="selectGoal(this, 'personal')">
+      <div>
+        <div class="option-title">Personal</div>
+        <div class="option-desc">Share links with friends</div>
+      </div>
+      <div class="icon personal">👤</div>
+    </div>
+
+    <button class="btn" id="btn1" onclick="goToStep2()">Continue</button>
+  </div>
+
+  <!-- ═══════════════════════════════
+       STEP 2 — Platforms
+  ═══════════════════════════════ -->
+  <div class="step" id="step2">
+    <h1>Which platforms are you on?</h1>
+    <p class="sub">Pick up to five to get started. You can update at any time.</p>
+
+    <div class="platform-grid">
+
+      <!-- Instagram -->
+      <div class="platform-tile" onclick="togglePlatform(this, 'instagram')">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect width="48" height="48" rx="12" fill="url(#ig)"/>
+          <defs>
+            <radialGradient id="ig" cx="30%" cy="107%" r="150%">
+              <stop offset="0%" stop-color="#fdf497"/>
+              <stop offset="10%" stop-color="#fdf497"/>
+              <stop offset="50%" stop-color="#fd5949"/>
+              <stop offset="68%" stop-color="#d6249f"/>
+              <stop offset="100%" stop-color="#285AEB"/>
+            </radialGradient>
+          </defs>
+          <rect x="12" y="12" width="24" height="24" rx="7" stroke="white" stroke-width="2.2" fill="none"/>
+          <circle cx="24" cy="24" r="6" stroke="white" stroke-width="2.2" fill="none"/>
+          <circle cx="31.5" cy="16.5" r="1.5" fill="white"/>
+        </svg>
+        <span class="platform-name">Instagram</span>
+      </div>
+
+      <!-- WhatsApp -->
+      <div class="platform-tile" onclick="togglePlatform(this, 'whatsapp')">
+        <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <rect width="48" height="48" rx="12" fill="#25D366"/>
+          <path d="M24 10C16.268 10 10 16.268 10 24c0 2.485.65 4.816 1.786 6.84L10 38l7.336-1.762A13.93 13.93 0 0024 38c7.732 0 14-6.268 14-14S31.732 10 24 10zm6.9 18.9c-.3.84-1.74 1.62-2.4 1.68-.66.06-1.26.3-4.26-1.02-3.54-1.56-5.76-5.16-5.94-5.4-.18-.24-1.44-1.92-1.44-3.66s.9-2.58 1.26-2.94c.36-.36.78-.42 1.02-.42.24 0 .48 0 .66.012.24.012.54-.084.84.66.3.72 1.02 2.46 1.1 2.64.12.18.18.42.06.66-.12.24-.18.42-.36.66-.18.24-.36.54-.54.72-.18.18-.36.42-.18.72.18.3.84 1.38 1.8 2.22 1.26 1.08 2.28 1.44 2.58 1.56.3.12.48.12.66-.06.18-.18.84-.96 1.08-1.32.24-.36.48-.3.78-.18.3.12 1.92.9 2.22 1.08.3.18.54.3.6.42.06.24.06 1.08-.24 1.92z" fill="white"/>
+        </svg>
+        <span class="platform-name">WhatsApp</span>
+      </div>
+
+      <!-- TikTok -->
+      <div class="platform-tile" onclick="togglePlatform(this, 'tiktok')">
+        <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <rect width="48" height="48" rx="12" fill="#010101"/>
+          <path d="M32.5 14.5c-1.1-1.3-1.7-3-1.7-4.5h-4.3v18.5c0 2-1.6 3.5-3.5 3.5s-3.5-1.6-3.5-3.5 1.6-3.5 3.5-3.5c.4 0 .7.06 1 .16V20.6c-.33-.04-.66-.1-1-.1-4.4 0-8 3.6-8 8s3.6 8 8 8 8-3.6 8-8V20.3c1.6 1.14 3.6 1.7 5.5 1.7v-4.2c-1.5 0-3-.7-4-3.3z" fill="white"/>
+        </svg>
+        <span class="platform-name">TikTok</span>
+      </div>
+
+      <!-- YouTube -->
+      <div class="platform-tile" onclick="togglePlatform(this, 'youtube')">
+        <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <rect width="48" height="48" rx="12" fill="#FF0000"/>
+          <path d="M38.2 17.6s-.4-2.6-1.5-3.7c-1.4-1.5-3-1.5-3.7-1.6C29 12 24 12 24 12s-5 0-9 .3c-.7.1-2.3.1-3.7 1.6-1.1 1.1-1.5 3.7-1.5 3.7S9.5 20.5 9.5 24v3.2c0 3.4.3 6.8.3 6.8s.4 2.6 1.5 3.7c1.4 1.5 3.3 1.4 4.2 1.6 3 .3 12.5.4 12.5.4s5 0 9-.3c.7-.1 2.3-.1 3.7-1.6 1.1-1.1 1.5-3.7 1.5-3.7s.3-3.4.3-6.8V24c0-3.4-.3-6.4-.3-6.4zM21 29V19l10 5-10 5z" fill="white"/>
+        </svg>
+        <span class="platform-name">YouTube</span>
+      </div>
+
+      <!-- Website -->
+      <div class="platform-tile" onclick="togglePlatform(this, 'website')">
+        <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <rect width="48" height="48" rx="12" fill="#1A1814"/>
+          <circle cx="24" cy="24" r="12" stroke="white" stroke-width="2" fill="none"/>
+          <path d="M24 12c-3 4-4 8-4 12s1 8 4 12M24 12c3 4 4 8 4 12s-1 8-4 12M12 24h24" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+        </svg>
+        <span class="platform-name">Website</span>
+      </div>
+
+      <!-- Spotify -->
+      <div class="platform-tile" onclick="togglePlatform(this, 'spotify')">
+        <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <rect width="48" height="48" rx="12" fill="#1DB954"/>
+          <circle cx="24" cy="24" r="12" fill="#1DB954"/>
+          <path d="M17 20.5c3.8-1.1 9.6-.9 13.2 1.2" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+          <path d="M18 24.5c3.2-.9 7.8-.7 10.8 1" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+          <path d="M19 28.5c2.4-.7 6-.5 8.2.8" stroke="white" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+        </svg>
+        <span class="platform-name">Spotify</span>
+      </div>
+
+      <!-- Threads -->
+      <div class="platform-tile" onclick="togglePlatform(this, 'threads')">
+        <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <rect width="48" height="48" rx="12" fill="#101010"/>
+          <path d="M28.5 22.5c-.8-.4-1.7-.6-2.5-.6-2.5 0-4.5 1.8-4.5 4s2 4 4.5 4c1.8 0 3.3-.8 4-2M28.5 22.5c.3.8.5 1.6.5 2.5 0 3.9-2.7 7-6 7s-6-3.1-6-7 2.7-7 6-7c1 0 2 .3 2.8.7M28.5 22.5V17" stroke="white" stroke-width="2" stroke-linecap="round" fill="none"/>
+        </svg>
+        <span class="platform-name">Threads</span>
+      </div>
+
+      <!-- Facebook -->
+      <div class="platform-tile" onclick="togglePlatform(this, 'facebook')">
+        <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <rect width="48" height="48" rx="12" fill="#1877F2"/>
+          <path d="M28 14h-3c-2.2 0-4 1.8-4 4v3h-3v4h3v10h4V25h3l1-4h-4v-3c0-.55.45-1 1-1h3v-3z" fill="white"/>
+        </svg>
+        <span class="platform-name">Facebook</span>
+      </div>
+
+      <!-- X / Twitter -->
+      <div class="platform-tile" onclick="togglePlatform(this, 'x')">
+        <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <rect width="48" height="48" rx="12" fill="#000"/>
+          <path d="M13 13l9 11.5L13 35h2.5l7-8.5 5.5 8.5H35L25.5 23 35 13h-2.5l-6.5 7.5L21 13H13z" fill="white"/>
+        </svg>
+        <span class="platform-name">X</span>
+      </div>
+
+    </div>
+
+    <p class="select-hint" id="selectHint">Select at least one platform</p>
+
+    <!-- Hidden inputs filled by JS — submitted to Django via the outer form -->
+    <input type="hidden" name="goal" id="goalHidden">
+    <input type="hidden" name="platforms" id="platformsHidden">
+
+    <div class="btn-row">
+      <button class="btn-back" onclick="goBack()">← Back</button>
+      <button class="btn" id="btn2" style="margin-top:0; flex:1" onclick="submitForm()">Save profile</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Real Django form hidden off-screen; JS submits it -->
+{% comment %} <form method="POST" action="{% url 'save_profile' %}" id="realForm" style="display:none"> {% endcomment %}
+<form method="POST" action="{% url 'save_profile' %}" id="realForm" style="display:none">
+  {% csrf_token %}
+  <input type="hidden" name="goal" id="formGoal">
+  <input type="hidden" name="platforms" id="formPlatforms">
+</form>
+
+<script>
+let selectedGoal = '';
+let selectedPlatforms = new Set();
+
+/* ── Step 1 ── */
+function selectGoal(el, value) {
+  document.querySelectorAll('.option').forEach(o => o.classList.remove('active'));
+  el.classList.add('active');
+  selectedGoal = value;
+  const btn = document.getElementById('btn1');
+  btn.classList.add('active');
+  btn.removeAttribute('disabled');
+}
+
+function goToStep2() {
+  if (!selectedGoal) return;
+  document.getElementById('step1').classList.remove('active');
+  document.getElementById('step2').classList.add('active');
+  document.getElementById('seg2').classList.add('done');
+}
+
+/* ── Step 2 ── */
+function togglePlatform(el, value) {
+  if (el.classList.contains('active')) {
+    el.classList.remove('active');
+    selectedPlatforms.delete(value);
+  } else {
+    if (selectedPlatforms.size >= 3) {
+      const hint = document.getElementById('selectHint');
+      hint.style.color = '#e53e3e';
+      hint.textContent = 'Max 3 platforms';
+      setTimeout(() => {
+        hint.style.color = '';
+        updateHint();
+      }, 1800);
+      return;
+    }
+    el.classList.add('active');
+    selectedPlatforms.add(value);
+  }
+  updateHint();
+  updateBtn2();
+}
+
+function updateHint() {
+  const hint = document.getElementById('selectHint');
+  const n = selectedPlatforms.size;
+  if (n === 0) hint.textContent = 'Select at least one platform';
+  else if (n === 3) hint.textContent = 'Max reached (3 / 3)';
+  else hint.textContent = `${n} selected · up to ${3 - n} more`;
+}
+
+function updateBtn2() {
+  const btn = document.getElementById('btn2');
+  if (selectedPlatforms.size > 0) {
+    btn.classList.add('active');
+  } else {
+    btn.classList.remove('active');
+  }
+}
+
+function goBack() {
+  document.getElementById('step2').classList.remove('active');
+  document.getElementById('step1').classList.add('active');
+  document.getElementById('seg2').classList.remove('done');
+}
+
+function submitForm() {
+  if (selectedPlatforms.size === 0) return;
+  document.getElementById('formGoal').value = selectedGoal;
+  document.getElementById('formPlatforms').value =
+  JSON.stringify([...selectedPlatforms]);
+  document.getElementById('realForm').submit();
+}
+</script>
+
+</body>
+</html>

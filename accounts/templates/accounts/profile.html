@@ -1,0 +1,731 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-mode="{{ mode }}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ display_name }} — Prism</title>
+  <meta name="description" content="{{ current_persona.bio|default:'View this Prism profile.' }}">
+
+  <script>
+    (function(){
+      try {
+        var d = JSON.parse(localStorage.getItem('prism_vp_{{ profile_user.username }}') || '{}');
+        if (d.mode && Date.now() < d.exp)
+          document.documentElement.setAttribute('data-mode', d.mode);
+      } catch(e) {}
+    })();
+  </script>
+
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <link rel="stylesheet" href="{% static 'accounts/css/profile.css' %}">
+  <style>
+    /* ── Media Kit ── */
+    .pmetrics-grid { border-bottom: 1px solid #F2F2F2; }
+
+    .pmetric-category {
+      padding: 10px 20px 12px;
+      border-bottom: 1px solid #F0F0F0;
+    }
+    .pmetric-category:last-child { border-bottom: none; }
+
+    .pmetric-cat-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ac);
+      opacity: 0.75;
+      margin-bottom: 10px;
+    }
+
+    .pmetric-cells {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+      gap: 8px 10px;
+      align-items: start;
+    }
+
+    /* ── Number metric cell ── */
+    .pmetric { display: flex; flex-direction: column; gap: 4px; }
+
+    .pmetric-value {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 20px;
+      color: #111;
+      line-height: 1;
+      letter-spacing: -0.01em;
+    }
+
+    .pmetric-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #888;
+      line-height: 1.3;
+    }
+
+    /* ── Ring metric cell — value as real HTML, not SVG text ── */
+    .pmetric--ring {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .pring-wrap {
+      position: relative;
+      width: 58px;
+      height: 58px;
+      flex-shrink: 0;
+    }
+
+    .pring-svg {
+      width: 58px;
+      height: 58px;
+      display: block;
+    }
+
+    .pring-val {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 12px;
+      font-weight: 400;
+      color: #111;
+      line-height: 1;
+      letter-spacing: -0.01em;
+      text-align: center;
+      padding: 4px;
+    }
+
+    .pmetric--ring .pmetric-label {
+      text-align: center;
+      font-size: 10px;
+      color: #888;
+    }
+  </style>
+  <link rel="icon" type="image/svg+xml" href="/static/accounts/favicon.svg">
+</head>
+
+<body>
+<div class="page-bg" aria-hidden="true"></div>
+
+<main class="page-stage">
+
+  <div id="scroll-hint" role="button" aria-label="Scroll down" tabindex="0">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#635BFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="6 9 12 15 18 9"></polyline>
+    </svg>
+  </div>
+
+  <div class="pcard" id="pCard">
+
+    <!-- ── Header: avatar + identity, left-aligned ── -->
+    <div class="pcard-head">
+
+      <div class="pcard-av-ring" id="pAvRing">
+        <div class="pcard-av" id="pAv">
+          {% if current_persona and current_persona.avatar %}
+            <img src="{{ current_persona.avatar.url }}" alt="{{ display_name }}">
+          {% else %}
+            {{ display_name|first|upper }}
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="pcard-id">
+        <h1 class="pcard-name" id="pName">{{ display_name }}</h1>
+        <p  class="pcard-role" id="pRole">
+          {% if current_persona and current_persona.cta_label %}
+            {{ current_persona.cta_label }}
+          {% endif %}
+        </p>
+        <div class="pcard-niche-tags" id="pNicheTags" style="display:none"></div>
+      </div>
+
+      <div class="pcard-open-badge" id="pOpenBadge" style="display:none" aria-label="Open to brand collaborations">
+        <span class="popen-dot" aria-hidden="true"></span>Open to collabs
+      </div>
+
+    </div>
+
+    <!-- ── Bio ── -->
+    {% if current_persona and current_persona.bio %}
+      <div class="pcard-bio-section" id="pBioWrap">
+        <p class="pcard-bio" id="pBio">{{ current_persona.bio }}</p>
+      </div>
+    {% else %}
+      <div class="pcard-bio-section" id="pBioWrap" style="display:none">
+        <p class="pcard-bio" id="pBio"></p>
+      </div>
+    {% endif %}
+
+    <!-- ── Media Kit Stats (brand only) ── -->
+    <div id="pMetricsSection" style="display:none">
+      <div class="pcard-section-label" style="padding:10px 20px 0;font-size:8px">Media Kit</div>
+      <div class="pmetrics-grid" id="pMetricsGrid"></div>
+    </div>
+
+    <!-- ── Platform cards (brand only — links with stats) ── -->
+    <div id="pPlatformsSection" style="display:none">
+      <div class="pcard-section-label" style="padding:18px 28px 0">Platforms & Reach</div>
+      <div class="pplatform-grid" id="pPlatformCards"></div>
+    </div>
+
+    <!-- ── Collab formats (brand mode only) ── -->
+    <div class="pcard-section" id="pCollabSection" style="display:none">
+      <div class="pcard-section-label">Collaboration Formats</div>
+      <div class="pcard-collab-tags" id="pCollabTags"></div>
+    </div>
+
+    <!-- ── Past brand partners (brand mode only) ── -->
+    <div class="pcard-section pcard-partners-section" id="pPartnersSection" style="display:none">
+      <div class="pcard-section-label">Worked With</div>
+      <div class="pcard-partners-scroll" id="pPartnersList"></div>
+    </div>
+
+    <!-- ── Links ── -->
+    <div class="pcard-links" id="pLinks">
+      {% if current_persona %}
+        {% for link in current_persona.links.all %}
+          {% if link.is_enabled %}
+            <a href="{{ link.url }}" target="_blank" rel="noopener noreferrer"
+               class="pl-link {% if link.is_cta %}pl-link-cta{% endif %}"
+               aria-label="{{ link.label }}">
+              <span class="pl-icon" aria-hidden="true">
+                {% if "youtube"    in link.label|lower %}<i class="ti ti-brand-youtube"></i>
+                {% elif "instagram" in link.label|lower %}<i class="ti ti-brand-instagram"></i>
+                {% elif "tiktok"    in link.label|lower %}<i class="ti ti-brand-tiktok"></i>
+                {% elif "twitter"   in link.label|lower %}<i class="ti ti-brand-twitter"></i>
+                {% elif link.label|lower == "x"        %}<i class="ti ti-brand-x"></i>
+                {% elif "spotify"   in link.label|lower %}<i class="ti ti-brand-spotify"></i>
+                {% elif "linkedin"  in link.label|lower %}<i class="ti ti-brand-linkedin"></i>
+                {% elif "github"    in link.label|lower %}<i class="ti ti-brand-github"></i>
+                {% elif "facebook"  in link.label|lower %}<i class="ti ti-brand-facebook"></i>
+                {% elif "whatsapp"  in link.label|lower %}<i class="ti ti-brand-whatsapp"></i>
+                {% elif "website"   in link.label|lower %}<i class="ti ti-world"></i>
+                {% elif "email"     in link.label|lower %}<i class="ti ti-mail"></i>
+                {% else %}<i class="ti ti-link"></i>{% endif %}
+              </span>
+              <span class="pl-label">{{ link.label }}</span>
+              <i class="ti ti-arrow-right pl-arr" aria-hidden="true"></i>
+            </a>
+          {% endif %}
+        {% empty %}
+          <p class="pcard-no-links">No links configured yet.</p>
+        {% endfor %}
+      {% else %}
+        <p class="pcard-no-links">Profile not configured.</p>
+      {% endif %}
+    </div>
+
+    <!-- ── Footer ── -->
+    <div class="pcard-foot">
+      <a href="{% url 'landing' %}" class="pcard-brand" style="display:inline-flex;align-items:center;gap:5px">
+        <span style="display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;background:#635BFF;border-radius:3px;flex-shrink:0">
+          <i class="ti ti-sparkles" style="font-size:9px;color:#fff;line-height:1"></i>
+        </span>
+        Prism
+      </a>
+      <span class="pcard-handle">prism.so/{{ profile_user.username }}</span>
+    </div>
+
+  </div><!-- /pcard -->
+
+</main>
+
+
+<!-- ── Who-are-you prompt ── -->
+{% if active_modes|length > 1 %}
+<div class="who-overlay" id="whoOverlay" aria-hidden="true"></div>
+<div class="who-sheet" id="whoSheet" role="dialog" aria-modal="true"
+     aria-label="Personalise your experience">
+
+  <div class="who-handle" aria-hidden="true"></div>
+
+  <div class="who-avatar-row" aria-hidden="true">
+    {% if current_persona and current_persona.avatar %}
+      <img src="{{ current_persona.avatar.url }}" class="who-av-img" alt="">
+    {% else %}
+      <div class="who-av-initial">{{ display_name|first|upper }}</div>
+    {% endif %}
+  </div>
+
+  <h2 class="who-title">You're visiting <strong>{{ display_name }}</strong></h2>
+  <p class="who-sub">Pick what describes you best — we'll show you exactly what's relevant.</p>
+
+  <div class="who-cards" role="group">
+    {% for m in active_modes %}
+      {% if m == 'fan' %}
+        <button class="who-card who-card-fan" onclick="choosePerson('fan')" type="button">
+          <span class="who-card-icon">❤️</span>
+          <span class="who-card-label">Fan</span>
+          <span class="who-card-desc">I follow their content</span>
+        </button>
+      {% elif m == 'brand' %}
+        <button class="who-card who-card-brand" onclick="choosePerson('brand')" type="button">
+          <span class="who-card-icon">💼</span>
+          <span class="who-card-label">Brand</span>
+          <span class="who-card-desc">Here to collaborate</span>
+        </button>
+      {% elif m == 'professional' %}
+        <button class="who-card who-card-pro" onclick="choosePerson('professional')" type="button">
+          <span class="who-card-icon">🤝</span>
+          <span class="who-card-label">Professional</span>
+          <span class="who-card-desc">Looking to hire or work together</span>
+        </button>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <button class="who-skip" onclick="skipPrompt()" type="button">
+    Just browsing — skip personalisation
+  </button>
+</div>
+{% endif %}
+
+
+<script>
+const PERSONAS     = {{ personas_json|safe }};
+const USERNAME     = '{{ profile_user.username }}';
+const ACTIVE_MODES = {{ active_modes|safe }};
+const DETECTED_BY  = '{{ detected_by }}';
+const DISPLAY_NAME = '{{ display_name|escapejs }}';
+const INITIAL      = '{{ display_name|first|upper|escapejs }}';
+
+const ROLE_DEFAULT = {
+  fan: 'Content Creator', brand: 'Brand Partnerships', professional: 'Available for Work'
+};
+
+const HEADER_BG = {
+  fan:          'linear-gradient(150deg,#1a0a0a 0%,#3d0c0c 45%,#6b1a1a 100%)',
+  brand:        'linear-gradient(150deg,#0f0c2e 0%,#1e1b4b 45%,#2d1b69 100%)',
+  professional: 'linear-gradient(150deg,#04111c 0%,#0a2540 45%,#0c3460 100%)',
+};
+
+let currentMode = document.documentElement.getAttribute('data-mode') || '{{ mode }}';
+
+/* Guard: stored mode may have been deactivated by the creator */
+(function(){
+  if (currentMode && !PERSONAS[currentMode]) {
+    currentMode = ACTIVE_MODES[0] || 'fan';
+    document.documentElement.setAttribute('data-mode', currentMode);
+    try { localStorage.removeItem('prism_vp_' + USERNAME); } catch(e) {}
+  }
+})();
+
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ── Platform metadata: icon, brand colours ── */
+const PI = {
+  youtube:   { icon:'ti-brand-youtube',   bg:'#FFF1F0', color:'#FF0000' },
+  instagram: { icon:'ti-brand-instagram', bg:'#FFF0F6', color:'#C13584' },
+  tiktok:    { icon:'ti-brand-tiktok',    bg:'#F0FAFA', color:'#010101' },
+  twitter:   { icon:'ti-brand-twitter',   bg:'#EBF8FF', color:'#1DA1F2' },
+  x:         { icon:'ti-brand-x',         bg:'#F5F5F5', color:'#111'    },
+  spotify:   { icon:'ti-brand-spotify',   bg:'#F0FFF6', color:'#1DB954' },
+  linkedin:  { icon:'ti-brand-linkedin',  bg:'#EBF5FB', color:'#0077B5' },
+  facebook:  { icon:'ti-brand-facebook',  bg:'#EBF2FB', color:'#1877F2' },
+  github:    { icon:'ti-brand-github',    bg:'#F5F5F5', color:'#24292E' },
+  pinterest: { icon:'ti-brand-pinterest', bg:'#FFF0F0', color:'#E60023' },
+  whatsapp:  { icon:'ti-brand-whatsapp',  bg:'#F0FFF4', color:'#25D366' },
+};
+function piMeta(label) {
+  const l = (label||'').toLowerCase();
+  for (const [k, v] of Object.entries(PI)) { if (l.includes(k)) return v; }
+  return { icon:'ti-chart-bar', bg:'#F5F5F5', color:'#888' };
+}
+
+/* ── Collab format → icon ── */
+const COLLAB_ICON = {
+  'Sponsored Post':        'ti-coin',
+  'Product Review':        'ti-star',
+  'Unboxing':              'ti-package',
+  'Brand Ambassador':      'ti-award',
+  'YouTube Integration':   'ti-brand-youtube',
+  'Instagram Story / Reel':'ti-brand-instagram',
+  'TikTok Integration':    'ti-brand-tiktok',
+  'Event Appearance':      'ti-map-pin',
+  'Gifting / PR':          'ti-gift',
+  'Podcast Mention':       'ti-microphone-2',
+  'Newsletter Feature':    'ti-mail',
+};
+
+/* ── Generic link icon ── */
+function icon(label) {
+  const l = (label||'').toLowerCase();
+  if (l.includes('youtube'))   return 'ti-brand-youtube';
+  if (l.includes('instagram')) return 'ti-brand-instagram';
+  if (l.includes('tiktok'))    return 'ti-brand-tiktok';
+  if (l.includes('twitter'))   return 'ti-brand-twitter';
+  if (l === 'x')               return 'ti-brand-x';
+  if (l.includes('spotify'))   return 'ti-brand-spotify';
+  if (l.includes('linkedin'))  return 'ti-brand-linkedin';
+  if (l.includes('github'))    return 'ti-brand-github';
+  if (l.includes('facebook'))  return 'ti-brand-facebook';
+  if (l.includes('whatsapp'))  return 'ti-brand-whatsapp';
+  if (l.includes('website') || l.includes('portfolio')) return 'ti-world';
+  if (l.includes('email') || l.includes('mail')) return 'ti-mail';
+  return 'ti-link';
+}
+
+/* ── Metrics that get ring charts (percentage-based, natural 0-100 scale) ── */
+const RING_KEYS = new Set(['engagement_rate','story_completion','link_ctr','growth_rate']);
+
+function renderRingCell(value, label) {
+  const raw  = String(value).replace(/\s/g, '');
+  const num  = parseFloat(raw.replace(/[^0-9.]/g, '')) || 0;
+  const isNeg = raw.startsWith('-');
+  /* Values ≤ 10 (e.g. "4.2%") → scale ×10 so ring shows meaningful fill */
+  const pct  = Math.min(num > 10 ? num : num * 10, 100);
+  const R    = 13.5;
+  const circ = 2 * Math.PI * R;
+  const dash = ((pct / 100) * circ).toFixed(2);
+  const gap  = (circ - parseFloat(dash)).toFixed(2);
+  const trackCol = '#EEEEEE';
+  const fillCol  = isNeg ? '#EF4444' : 'rgba(var(--ac-rgb),0.8)';
+  return `
+    <div class="pmetric pmetric--ring">
+      <div class="pring-wrap">
+        <svg viewBox="0 0 36 36" class="pring-svg" aria-hidden="true">
+          <circle cx="18" cy="18" r="${R}" fill="none" stroke="${trackCol}" stroke-width="3.5"/>
+          <circle cx="18" cy="18" r="${R}" fill="none" stroke="${fillCol}" stroke-width="3.5"
+            stroke-dasharray="${dash} ${gap}" stroke-linecap="round"
+            transform="rotate(-90 18 18)"/>
+        </svg>
+        <div class="pring-val">${esc(value)}</div>
+      </div>
+      <div class="pmetric-label">${esc(label)}</div>
+    </div>`;
+}
+
+/* ── Brand metric display labels ── */
+const METRIC_META = {
+  engagement_rate:  { label: 'Engagement Rate',   category: 'audience'     },
+  follower_count:   { label: 'Total Reach',        category: 'audience'     },
+  audience_age:     { label: 'Audience Age',       category: 'audience'     },
+  top_location:     { label: 'Top Location',       category: 'audience'     },
+  avg_views:        { label: 'Avg Views',          category: 'performance'  },
+  avg_likes:        { label: 'Avg Likes',          category: 'performance'  },
+  story_completion: { label: 'Story Completion',   category: 'performance'  },
+  watch_time:       { label: 'Avg Watch Time',     category: 'performance'  },
+  growth_rate:      { label: 'Growth Rate (30d)',  category: 'growth'       },
+  monthly_reach:    { label: 'Monthly Reach',      category: 'growth'       },
+  link_ctr:         { label: 'Link CTR',           category: 'results'      },
+  collab_count:     { label: 'Brand Deals Done',   category: 'results'      },
+};
+
+const CATEGORY_ORDER = ['audience', 'performance', 'growth', 'results'];
+
+/* ── Stable hue for brand letter avatars ── */
+const BAV_PALETTE = ['#F87171','#FB923C','#FBBF24','#34D399','#38BDF8','#818CF8','#F472B6','#A78BFA'];
+function bavColor(name) {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+  return BAV_PALETTE[h % BAV_PALETTE.length];
+}
+
+function renderCard(mode) {
+  const p = PERSONAS[mode];
+  if (!p) return;
+
+  const isBrand = mode === 'brand';
+
+  /* Avatar */
+  const av = document.getElementById('pAv');
+  av.innerHTML = p.avatar
+    ? `<img src="${esc(p.avatar)}" alt="" style="width:100%;height:100%;object-fit:cover;display:block;">`
+    : esc(INITIAL);
+
+  /* Name + Role */
+  document.getElementById('pName').textContent = DISPLAY_NAME;
+  document.getElementById('pRole').textContent = p.cta_label || ROLE_DEFAULT[mode] || '';
+
+  /* Open-to-collabs badge */
+  document.getElementById('pOpenBadge').style.display = isBrand ? '' : 'none';
+
+  /* Niche tags */
+  const nicheEl   = document.getElementById('pNicheTags');
+  const nicheTags = (p.niche_tags || []).filter(Boolean);
+  if (isBrand && nicheTags.length) {
+    nicheEl.innerHTML = nicheTags.map(t => `<span class="pniche-tag">${esc(t)}</span>`).join('');
+    nicheEl.style.display = '';
+  } else { nicheEl.style.display = 'none'; }
+
+  /* Bio */
+  const bioWrap = document.getElementById('pBioWrap');
+  const bioEl   = document.getElementById('pBio');
+  if (p.bio) { bioEl.textContent = p.bio; bioWrap.style.display = ''; }
+  else        { bioWrap.style.display = 'none'; }
+
+  /* ── MEDIA KIT STATS (brand only) ── */
+  const metricsSection = document.getElementById('pMetricsSection');
+  const metricsGrid    = document.getElementById('pMetricsGrid');
+  const rawMetrics     = (isBrand && p.brand_metrics) ? p.brand_metrics : {};
+  const filledMetrics  = Object.entries(rawMetrics).filter(([k, v]) => v && METRIC_META[k]);
+
+  if (isBrand && filledMetrics.length) {
+    const grouped = {};
+    CATEGORY_ORDER.forEach(c => { grouped[c] = []; });
+    filledMetrics.forEach(([k, v]) => {
+      const cat = METRIC_META[k]?.category || 'audience';
+      if (grouped[cat]) grouped[cat].push({ key: k, value: v, label: METRIC_META[k].label });
+    });
+
+    const CAT_LABELS = {
+      audience: 'Audience', performance: 'Performance',
+      growth: 'Growth', results: 'Business Results',
+    };
+
+    metricsGrid.innerHTML = CATEGORY_ORDER
+      .filter(cat => grouped[cat].length)
+      .map(cat => `
+        <div class="pmetric-category">
+          <div class="pmetric-cat-label">${esc(CAT_LABELS[cat])}</div>
+          <div class="pmetric-cells">
+            ${grouped[cat].map(m => RING_KEYS.has(m.key)
+              ? renderRingCell(m.value, m.label)
+              : `<div class="pmetric">
+                   <div class="pmetric-value">${esc(m.value)}</div>
+                   <div class="pmetric-label">${esc(m.label)}</div>
+                 </div>`
+            ).join('')}
+          </div>
+        </div>`).join('');
+
+    metricsSection.style.display = '';
+  } else {
+    metricsSection.style.display = 'none';
+  }
+
+  /* ── PLATFORM CARDS (brand only — links with stat_value) ── */
+  const platformsSection = document.getElementById('pPlatformsSection');
+  const platformCards    = document.getElementById('pPlatformCards');
+  const platformLinks    = (p.links || []).filter(l => l.is_enabled && l.stat_value && !l.is_cta);
+
+  if (isBrand && platformLinks.length) {
+    platformCards.innerHTML = platformLinks.map(l => {
+      const m = piMeta(l.label);
+      return `
+        <a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer"
+           class="pplatform-card" aria-label="${esc(l.label)}"
+           style="--pi-bg:${m.bg};--pi-color:${m.color}">
+          <div class="pplatform-top">
+            <div class="pplatform-icon-name">
+              <div class="pplatform-icon"><i class="ti ${m.icon}"></i></div>
+              <span class="pplatform-name">${esc(l.label)}</span>
+            </div>
+            <i class="ti ti-arrow-up-right pplatform-ext" aria-hidden="true"></i>
+          </div>
+          <div class="pplatform-bottom">
+            <div class="pplatform-stat-value">${esc(l.stat_value)}</div>
+            <div class="pplatform-stat-label">${esc(l.stat_label || 'Reach')}</div>
+          </div>
+        </a>`;
+    }).join('');
+    platformsSection.style.display = '';
+  } else { platformsSection.style.display = 'none'; }
+
+  /* ── COLLABORATION FORMATS (brand only) ── */
+  const collabSection = document.getElementById('pCollabSection');
+  const collabTags    = document.getElementById('pCollabTags');
+  const collabTypes   = (p.collab_types || []).filter(Boolean);
+  if (isBrand && collabTypes.length) {
+    collabTags.innerHTML = collabTypes.map(ct => {
+      const ico = COLLAB_ICON[ct] || 'ti-check';
+      return `<span class="pcollab-tag"><i class="ti ${ico} pcollab-icon" aria-hidden="true"></i>${esc(ct)}</span>`;
+    }).join('');
+    collabSection.style.display = '';
+  } else { collabSection.style.display = 'none'; }
+
+  /* ── WORKED WITH (brand only) ── */
+  const partnersSection = document.getElementById('pPartnersSection');
+  const partnersList    = document.getElementById('pPartnersList');
+  const pastBrands      = (p.past_brands || []).filter(Boolean);
+  if (isBrand && pastBrands.length) {
+    partnersList.innerHTML = pastBrands.map(b => {
+      const c = bavColor(b);
+      const initial = b.trim()[0] ? esc(b.trim()[0].toUpperCase()) : '?';
+      return `<span class="ppartner">
+        <span class="ppartner-av" style="background:${c}" aria-hidden="true">${initial}</span>
+        ${esc(b)}
+      </span>`;
+    }).join('');
+    partnersSection.style.display = '';
+  } else { partnersSection.style.display = 'none'; }
+
+  /* ── LINKS ── In brand mode, platform links (with stat) are shown as cards above.
+     Only show links without stat, plus CTA links, in the list row section. ── */
+  const allLinks  = (p.links || []).filter(l => l.is_enabled);
+  const listLinks = isBrand
+    ? allLinks.filter(l => !l.stat_value || l.is_cta)
+    : allLinks;
+  const box = document.getElementById('pLinks');
+
+  if (!listLinks.length && !allLinks.length) {
+    box.innerHTML = '<p class="pcard-no-links">No links configured yet.</p>';
+    return;
+  }
+
+  if (!listLinks.length) { box.innerHTML = ''; return; }
+
+  box.innerHTML = listLinks.map(l => `
+    <a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer"
+       class="pl-link${l.is_cta ? ' pl-link-cta' : ''}" aria-label="${esc(l.label)}">
+      <span class="pl-icon" aria-hidden="true"><i class="ti ${icon(l.label)}"></i></span>
+      <span class="pl-label">${esc(l.label)}</span>
+      <i class="ti ti-arrow-right pl-arr" aria-hidden="true"></i>
+    </a>`).join('');
+}
+
+function switchMode(newMode) {
+  if (newMode === currentMode || !PERSONAS[newMode]) return;
+  const card = document.getElementById('pCard');
+  card.style.transition = 'transform 0.22s cubic-bezier(0.4,0,1,1), opacity 0.22s ease';
+  card.style.transform  = 'perspective(900px) rotateY(90deg)';
+  card.style.opacity    = '0';
+  setTimeout(() => {
+    currentMode = newMode;
+    document.documentElement.setAttribute('data-mode', newMode);
+    renderCard(newMode);
+    card.style.transition = 'transform 0.22s cubic-bezier(0,0,0.2,1), opacity 0.22s ease';
+    card.style.transform  = 'perspective(900px) rotateY(0deg)';
+    card.style.opacity    = '1';
+  }, 230);
+}
+
+function persist(mode, days=90) {
+  try {
+    localStorage.setItem('prism_vp_'+USERNAME, JSON.stringify({
+      mode, exp: Date.now() + days*24*3600*1000
+    }));
+  } catch(e) {}
+}
+
+/* ── Prompt ── */
+function initPrompt() {
+  if (ACTIVE_MODES.length <= 1) return;
+  try {
+    if (sessionStorage.getItem('prism_skip_'+USERNAME)) return;
+    const s = JSON.parse(localStorage.getItem('prism_vp_'+USERNAME)||'{}');
+    if (s.mode && Date.now() < s.exp) return;
+  } catch(e) {}
+  if (['url_param','user_agent','referrer'].includes(DETECTED_BY)) { persist(currentMode); return; }
+  setTimeout(openPrompt, 1000);
+}
+
+function openPrompt() {
+  const o = document.getElementById('whoOverlay');
+  const s = document.getElementById('whoSheet');
+  if (!o||!s) return;
+  o.removeAttribute('aria-hidden'); o.classList.add('open');
+  s.classList.add('open');
+  setTimeout(() => s.querySelector('.who-opt')?.focus(), 520);
+}
+
+function closePrompt() {
+  document.getElementById('whoOverlay')?.setAttribute('aria-hidden','true');
+  document.getElementById('whoOverlay')?.classList.remove('open');
+  document.getElementById('whoSheet')?.classList.remove('open');
+}
+
+function choosePerson(mode) { closePrompt(); persist(mode); switchMode(mode); }
+
+function skipPrompt() {
+  closePrompt();
+  try { sessionStorage.setItem('prism_skip_'+USERNAME,'1'); } catch(e) {}
+}
+
+document.getElementById('whoOverlay')?.addEventListener('click', skipPrompt);
+document.addEventListener('keydown', e => { if (e.key==='Escape') skipPrompt(); });
+
+/* ── Context detection (silent) ── */
+async function detectFromContext() {
+  try {
+    const r = await fetch('/detect-client/', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-CSRFToken':(document.cookie.match(/csrftoken=([^;]+)/)||[])[1]||''},
+      body: JSON.stringify({hour:new Date().getHours(),is_mobile:/Mobi|Android|iPhone/i.test(navigator.userAgent),is_weekend:[0,6].includes(new Date().getDay()),active_modes:ACTIVE_MODES}),
+    });
+    const d = await r.json();
+    if (d.mode && PERSONAS[d.mode] && d.mode!==currentMode && d.confidence>=0.35) { switchMode(d.mode); persist(d.mode); }
+  } catch(e) {}
+}
+
+/* ── Boot ── */
+document.addEventListener('DOMContentLoaded', () => {
+  renderCard(currentMode);
+  initPrompt();
+  if (DETECTED_BY==='unknown') {
+    const willPrompt = ACTIVE_MODES.length>1 && !localStorage.getItem('prism_vp_'+USERNAME) && !sessionStorage.getItem('prism_skip_'+USERNAME);
+    if (!willPrompt) detectFromContext();
+  }
+
+  // ── Scroll-down hint button ──────────────────────────────────────────────
+  const btn  = document.getElementById('scroll-hint');
+  const card = document.querySelector('.pcard');
+  if (btn && card) {
+    function updateScrollHint() {
+      const atBottom = card.scrollTop + card.clientHeight >= card.scrollHeight - 40;
+      const hasRoom  = card.scrollHeight > card.clientHeight + 80;
+      const show = !atBottom && hasRoom;
+      btn.classList.toggle('visible', show);
+    }
+    btn.addEventListener('click', () => {
+      card.scrollBy({ top: card.clientHeight * 0.75, behavior: 'smooth' });
+    });
+    card.addEventListener('scroll', updateScrollHint, { passive: true });
+    window.addEventListener('resize', updateScrollHint);
+    // defer until after renderCard() has populated the DOM and browser has laid out
+    requestAnimationFrame(() => requestAnimationFrame(updateScrollHint));
+    window.addEventListener('load', updateScrollHint);
+  }
+});
+</script>
+
+<!-- ── Scroll hint ── -->
+<style>
+  .page-stage { position: relative; }
+  #scroll-hint {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    border-radius: 0 0 24px 24px;
+    background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.98) 100%);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 10px;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+    z-index: 10;
+  }
+  #scroll-hint.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  #scroll-hint svg {
+    animation: hint-drift 1.8s ease-in-out infinite;
+  }
+  @keyframes hint-drift {
+    0%, 100% { transform: translateY(0);   opacity: 0.4; }
+    50%       { transform: translateY(4px); opacity: 1;   }
+  }
+</style>
+
+</body>
+</html>

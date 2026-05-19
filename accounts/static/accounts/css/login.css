@@ -1,0 +1,154 @@
+/* ═══════════════════════════════════════════
+   SCREEN 2 — AUTH (signup / login)
+═══════════════════════════════════════════ */
+
+.auth-wrap {
+  min-height: 100vh;
+  display: flex;
+}
+
+.auth-left {
+  width: 420px;
+  flex-shrink: 0;
+  padding: 48px 52px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+}
+
+.auth-right {
+  flex: 1;
+  background: var(--accent-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-right-bg {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(91,71,224,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(91,71,224,0.06) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.auth-right-card {
+  position: relative;
+  z-index: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px 24px;
+  width: 260px;
+  box-shadow: var(--shadow-lg);
+}
+
+.auth-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 36px;
+}
+
+.auth-logo-mark {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 16px;
+}
+
+.auth-logo-name {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.auth-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 26px;
+  margin-bottom: 6px;
+}
+
+.auth-subtitle {
+  font-size: 14px;
+  color: var(--text-2);
+  margin-bottom: 32px;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  color: var(--text-3);
+  font-size: 12px;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.social-btn {
+  width: 100%;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 400;
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  transition: background 0.15s;
+  margin-bottom: 8px;
+}
+
+.social-btn:hover {
+  background: var(--surface2);
+}
+
+.social-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+}
+
+.auth-switch {
+  font-size: 13px;
+  color: var(--text-2);
+  text-align: center;
+  margin-top: 20px;
+}
+
+.auth-switch a {
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.auth-terms {
+  font-size: 11px;
+  color: var(--text-3);
+  text-align: center;
+  margin-top: 16px;
+  line-height: 1.5;
+}

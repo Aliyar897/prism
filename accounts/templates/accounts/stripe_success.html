@@ -1,0 +1,84 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Welcome to Pro — Prism</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Inter", system-ui, sans-serif;
+      background: #0f0c2e;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 20px;
+      padding: 48px 40px;
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+    }
+    .icon { font-size: 48px; margin-bottom: 20px; }
+    h1 { font-size: 24px; font-weight: 700; margin-bottom: 10px; }
+    p  { font-size: 14px; color: rgba(255,255,255,0.6); line-height: 1.7; margin-bottom: 32px; }
+    .features {
+      list-style: none;
+      margin-bottom: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      text-align: left;
+    }
+    .features li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.8);
+    }
+    .features li::before {
+      content: '✓';
+      width: 20px; height: 20px;
+      background: rgba(99,91,255,0.3);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: #a78bfa;
+      flex-shrink: 0;
+    }
+    .btn {
+      display: inline-block;
+      background: linear-gradient(135deg, #635BFF, #a78bfa);
+      color: #fff;
+      text-decoration: none;
+      padding: 13px 32px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+  </style>
+  <link rel="icon" type="image/svg+xml" href="/static/accounts/favicon.svg">
+</head>
+<body>
+  <div class="card">
+    <div class="icon">🎉</div>
+    <h1>You're on Pro!</h1>
+    <p>Your payment was successful. All Pro features are now unlocked on your account.</p>
+    <ul class="features">
+      <li>All 3 personas — Fan, Brand, Professional</li>
+      <li>Unlimited links per persona</li>
+      <li>Media Kit Stats &amp; Brand Kit</li>
+      <li>Platform stat cards on brand profile</li>
+    </ul>
+    <a href="/dashboard/" class="btn">Go to Dashboard →</a>
+  </div>
+</body>
+</html>

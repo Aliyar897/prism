@@ -1,0 +1,672 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Settings — Prism</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <link rel="stylesheet" href="{% static 'accounts/css/dashboard.css' %}">
+  <style>
+    /* ── Settings-specific styles ── */
+    .settings-body { max-width: 680px; }
+
+    .settings-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+    .settings-section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 18px 24px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .settings-section-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+    .si-profile  { background: #FFF0F0; color: #FF6B6B; }
+    .si-account  { background: #EEEEFF; color: #635BFF; }
+    .si-plan     { background: #E0F4FD; color: #0EA5E9; }
+    .si-danger   { background: #FDECEA; color: var(--red); }
+
+    .settings-section-title {
+      font-size: 14px; font-weight: 600; color: var(--text);
+    }
+    .settings-section-sub {
+      font-size: 12px; color: var(--text-3); margin-top: 1px;
+    }
+    .settings-section-body { padding: 20px 24px; }
+
+    /* Avatar row */
+    .s-avatar-row {
+      display: flex; align-items: center; gap: 16px;
+      margin-bottom: 20px;
+    }
+    .s-av {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: var(--surface2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; font-weight: 600; color: var(--text-2);
+      overflow: hidden; cursor: pointer; position: relative;
+      border: 2px solid var(--border-md); flex-shrink: 0;
+      transition: border-color .15s;
+    }
+    .s-av:hover { border-color: var(--accent); }
+    .s-av img { width:100%; height:100%; object-fit:cover; }
+    .s-av-overlay {
+      position: absolute; inset: 0; background: rgba(0,0,0,0.45);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity .15s; border-radius: 50%;
+      color: #fff; font-size: 18px;
+    }
+    .s-av:hover .s-av-overlay { opacity: 1; }
+    .s-av-info { flex: 1; }
+    .s-av-label { font-size: 13px; font-weight: 600; color: var(--text); }
+    .s-av-hint  { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+
+    /* Username input with prefix */
+    .username-wrap {
+      display: flex; align-items: center;
+      border: 1px solid var(--border-md); border-radius: var(--r-sm);
+      overflow: hidden; background: var(--surface);
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .username-wrap:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(99,91,255,.12);
+    }
+    .username-prefix {
+      padding: 0 10px; font-size: 13px; color: var(--text-3);
+      background: var(--surface2); border-right: 1px solid var(--border-md);
+      white-space: nowrap; height: 38px; display: flex; align-items: center;
+    }
+    .username-field {
+      border: none !important; box-shadow: none !important; border-radius: 0 !important;
+      flex: 1; padding: 0 10px; height: 38px; font-size: 13px; background: transparent;
+      outline: none; color: var(--text);
+    }
+    .username-hint {
+      font-size: 11px; margin-top: 5px; line-height: 1.4;
+    }
+    .username-hint.ok   { color: var(--green); }
+    .username-hint.err  { color: var(--red); }
+    .username-hint.info { color: var(--text-3); }
+
+    /* Goal selector */
+    .goal-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+    }
+    .goal-opt {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      padding: 12px 8px; border: 2px solid var(--border-md); border-radius: var(--r-sm);
+      cursor: pointer; transition: border-color .15s, background .15s;
+      text-align: center;
+    }
+    .goal-opt input { display: none; }
+    .goal-opt-icon { font-size: 20px; }
+    .goal-opt-label { font-size: 12px; font-weight: 500; color: var(--text-2); }
+    .goal-opt.selected {
+      border-color: var(--accent); background: var(--accent-bg);
+    }
+    .goal-opt.selected .goal-opt-label { color: var(--accent); }
+
+    /* Email display */
+    .email-display {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 12px; background: var(--surface2);
+      border: 1px solid var(--border); border-radius: var(--r-sm);
+      font-size: 13px; color: var(--text-2);
+    }
+    .email-display i { color: var(--text-3); }
+
+    /* Divider inside section */
+    .s-divider {
+      border: none; border-top: 1px solid var(--border);
+      margin: 20px 0;
+    }
+    .s-sub-title {
+      font-size: 12px; font-weight: 600; letter-spacing: .05em;
+      text-transform: uppercase; color: var(--text-3); margin-bottom: 14px;
+    }
+
+    /* Plan badge in header */
+    .plan-badge-pill {
+      margin-left: auto;
+      padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+    }
+    .plan-badge-pill.free { background: var(--surface2); color: var(--text-2); }
+    .plan-badge-pill.pro  { background: #EDE9FE; color: #6D28D9; }
+
+    /* Plan features list */
+    .plan-features { list-style: none; display: flex; flex-direction: column; gap: 8px; margin: 16px 0; }
+    .plan-features li { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-2); }
+    .plan-features li i { color: var(--green); font-size: 15px; flex-shrink: 0; }
+    .plan-features li.locked i { color: var(--text-3); }
+    .plan-features li.locked { color: var(--text-3); }
+
+    /* Danger zone */
+    .danger-desc {
+      font-size: 13px; color: var(--text-2); line-height: 1.6; margin-bottom: 16px;
+    }
+    .btn-danger {
+      background: var(--red); color: #fff; border: none;
+      padding: 8px 16px; border-radius: var(--r-sm); font-size: 13px;
+      font-weight: 600; cursor: pointer; transition: opacity .15s;
+    }
+    .btn-danger:hover { opacity: .88; }
+
+
+    /* Modal overrides for delete */
+    #deleteModal .modal-box { max-width: 420px; }
+    .delete-confirm-label {
+      font-size: 13px; color: var(--text-2); margin-bottom: 8px; line-height: 1.6;
+    }
+    .delete-confirm-label strong { color: var(--text); }
+  </style>
+  <link rel="icon" type="image/svg+xml" href="/static/accounts/favicon.svg">
+</head>
+<body>
+
+<!-- ════ SIDEBAR ════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-gem"><i class="ti ti-sparkles"></i></div>
+    <div class="logo-name">Prism</div>
+  </div>
+
+  <div class="sidebar-user">
+    <div class="user-av">
+      {% if profile.avatar %}<img src="{{ profile.avatar.url }}">
+      {% else %}{{ profile.user.username|first|upper }}{% endif %}
+    </div>
+    <div>
+      <div class="user-name">{{ profile.user.first_name|default:profile.user.email }}</div>
+      <div class="user-plan" style="{% if is_pro %}background:#EDE9FE;color:#6D28D9{% endif %}">{{ profile.plan|capfirst }}</div>
+    </div>
+  </div>
+
+  <div style="padding:6px 0;flex:1">
+    <div class="nav-section">Audience</div>
+    <a href="{% url 'dashboard' %}" class="mode-nav" style="text-decoration:none;color:inherit" id="snav-fan">
+      <div class="mode-dot" style="background:#FF6B6B"></div>
+      <i class="ti ti-heart" style="font-size:15px"></i> Fans
+    </a>
+    <a href="{% url 'dashboard' %}" class="mode-nav {% if not is_pro %}mode-nav-locked{% endif %}" style="text-decoration:none;color:inherit">
+      <div class="mode-dot" style="background:#635BFF"></div>
+      <i class="ti ti-briefcase" style="font-size:15px"></i> Brands
+      {% if not is_pro %}<i class="ti ti-lock" style="font-size:11px;margin-left:auto;opacity:0.4"></i>{% endif %}
+    </a>
+    <a href="{% url 'dashboard' %}" class="mode-nav {% if not is_pro %}mode-nav-locked{% endif %}" style="text-decoration:none;color:inherit">
+      <div class="mode-dot" style="background:#0EA5E9"></div>
+      <i class="ti ti-user-check" style="font-size:15px"></i> Professional
+      {% if not is_pro %}<i class="ti ti-lock" style="font-size:11px;margin-left:auto;opacity:0.4"></i>{% endif %}
+    </a>
+
+    <div class="nav-divider"></div>
+    <div class="nav-section">Workspace</div>
+    <a href="{% url 'dashboard' %}" class="nav-item" style="text-decoration:none;color:inherit"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+    <div class="nav-item" style="opacity:.5;cursor:default" title="Coming soon"><i class="ti ti-chart-line"></i> Analytics</div>
+    <div class="nav-item" style="opacity:.5;cursor:default" title="Coming soon"><i class="ti ti-sparkles"></i> AI Insights</div>
+    <a href="{% url 'settings' %}" class="nav-item active" style="text-decoration:none;color:inherit"><i class="ti ti-settings"></i> Settings</a>
+    <div class="nav-divider"></div>
+    <form method="POST" action="{% url 'account_logout' %}" style="margin:0">
+      {% csrf_token %}
+      <button type="submit" class="nav-item" style="width:100%;color:var(--red);background:none;border:none;cursor:pointer;font-family:inherit;font-size:inherit;text-align:left;">
+        <i class="ti ti-logout"></i> Sign out
+      </button>
+    </form>
+  </div>
+
+  <div class="sidebar-bottom">
+    {% if is_pro %}
+    <div class="upgrade-box" style="background:linear-gradient(135deg,#1E1B4B 0%,#2D1B69 100%)">
+      <div class="upgrade-box-title">✦ Pro plan active</div>
+      <div class="upgrade-box-desc">All features unlocked. Thanks for supporting Prism.</div>
+    </div>
+    {% else %}
+    <div class="upgrade-box">
+      <div class="upgrade-box-title">⚡ Upgrade to Pro</div>
+      <div class="upgrade-box-desc">All 3 personas, unlimited links &amp; full Brand Kit.</div>
+      <a href="{% url 'pricing' %}" class="upgrade-box-btn">See plans</a>
+    </div>
+    {% endif %}
+  </div>
+</aside>
+
+<!-- ════ MAIN ════ -->
+<div class="main-wrap">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="breadcrumb">Dashboard → <strong>Settings</strong></div>
+      <a href="{% url 'public_profile' profile.user.username %}" target="_blank" class="topbar-url">
+        <i class="ti ti-lock"></i>
+        prism.so/{{ profile.user.username }}
+        <i class="ti ti-external-link" style="font-size:11px;margin-left:2px"></i>
+      </a>
+    </div>
+    <div class="topbar-actions">
+      <a href="{% url 'dashboard' %}" class="btn btn-ghost btn-sm">
+        <i class="ti ti-arrow-left" style="font-size:13px"></i> Back
+      </a>
+    </div>
+  </div>
+
+  <!-- PAGE BODY -->
+  <div class="page-body settings-body">
+
+    <div class="page-header">
+      <div>
+        <div class="page-title">Settings</div>
+        <div class="page-sub">Manage your account, profile, and plan.</div>
+      </div>
+    </div>
+
+    <!-- ── Profile ── -->
+    <div class="settings-section">
+      <div class="settings-section-header">
+        <div class="settings-section-icon si-profile"><i class="ti ti-user-circle"></i></div>
+        <div>
+          <div class="settings-section-title">Profile</div>
+          <div class="settings-section-sub">Your public identity on Prism</div>
+        </div>
+      </div>
+      <div class="settings-section-body">
+
+        <!-- Avatar -->
+        <div class="s-avatar-row">
+          <div class="s-av" id="settingsAv" onclick="document.getElementById('avatarInput').click()">
+            {% if profile.avatar %}
+              <img src="{{ profile.avatar.url }}" id="settingsAvImg">
+            {% else %}
+              <span id="settingsAvInitial">{{ profile.user.first_name|first|upper|default:profile.user.username|first|upper }}</span>
+            {% endif %}
+            <div class="s-av-overlay"><i class="ti ti-camera"></i></div>
+          </div>
+          <div class="s-av-info">
+            <div class="s-av-label">Profile photo</div>
+            <div class="s-av-hint">JPG or PNG. Shown in your dashboard sidebar.</div>
+          </div>
+        </div>
+        <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="uploadAvatar(this)">
+
+        <!-- Display name -->
+        <div class="form-group" style="margin-bottom:14px">
+          <label class="form-label">Display name</label>
+          <input id="displayName" class="form-input" type="text"
+            placeholder="e.g. Ali Khan"
+            value="{{ profile.user.first_name }}{% if profile.user.last_name %} {{ profile.user.last_name }}{% endif %}">
+        </div>
+
+        <!-- Username -->
+        <div class="form-group" style="margin-bottom:14px">
+          <label class="form-label">Username <span style="color:var(--text-3);font-weight:400">— your public URL</span></label>
+          <div class="username-wrap">
+            <span class="username-prefix">prism.so/</span>
+            <input id="usernameField" class="username-field" type="text"
+              value="{{ profile.user.username }}"
+              placeholder="yourname"
+              oninput="validateUsername(this.value)">
+          </div>
+          <div id="usernameHint" class="username-hint info">Changing this changes your public link.</div>
+        </div>
+
+        <!-- Goal -->
+        <div class="form-group" style="margin-bottom:20px">
+          <label class="form-label">I am a...</label>
+          <div class="goal-grid">
+            <label class="goal-opt {% if profile.goal == 'creator' %}selected{% endif %}" data-goal="creator">
+              <input type="radio" name="goal" value="creator" {% if profile.goal == 'creator' %}checked{% endif %}>
+              <span class="goal-opt-icon">🎨</span>
+              <span class="goal-opt-label">Creator</span>
+            </label>
+            <label class="goal-opt {% if profile.goal == 'business' %}selected{% endif %}" data-goal="business">
+              <input type="radio" name="goal" value="business" {% if profile.goal == 'business' %}checked{% endif %}>
+              <span class="goal-opt-icon">💼</span>
+              <span class="goal-opt-label">Business</span>
+            </label>
+            <label class="goal-opt {% if profile.goal == 'personal' %}selected{% endif %}" data-goal="personal">
+              <input type="radio" name="goal" value="personal" {% if profile.goal == 'personal' %}checked{% endif %}>
+              <span class="goal-opt-icon">👤</span>
+              <span class="goal-opt-label">Personal</span>
+            </label>
+          </div>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end">
+          <button class="btn btn-primary btn-sm" onclick="saveProfile()">
+            <i class="ti ti-check" style="font-size:12px"></i> Save profile
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Account ── -->
+    <div class="settings-section">
+      <div class="settings-section-header">
+        <div class="settings-section-icon si-account"><i class="ti ti-shield-lock"></i></div>
+        <div>
+          <div class="settings-section-title">Account</div>
+          <div class="settings-section-sub">Email and password</div>
+        </div>
+      </div>
+      <div class="settings-section-body">
+
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">Email address</label>
+          <div class="email-display">
+            <i class="ti ti-mail"></i>
+            {{ profile.user.email }}
+          </div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:5px">Contact support to change your email address.</div>
+        </div>
+
+        <hr class="s-divider">
+
+        <div class="s-sub-title">Change password</div>
+
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label">Current password</label>
+          <input id="oldPassword" class="form-input" type="password" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <div class="form-group" style="margin-bottom:12px">
+          <label class="form-label">New password</label>
+          <input id="newPassword" class="form-input" type="password" placeholder="Min. 8 characters" autocomplete="new-password">
+        </div>
+        <div class="form-group" style="margin-bottom:20px">
+          <label class="form-label">Confirm new password</label>
+          <input id="confirmPassword" class="form-input" type="password" placeholder="Repeat new password" autocomplete="new-password">
+        </div>
+        <div style="display:flex;justify-content:flex-end">
+          <button class="btn btn-primary btn-sm" onclick="changePassword()">
+            <i class="ti ti-lock" style="font-size:12px"></i> Update password
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Plan ── -->
+    <div class="settings-section">
+      <div class="settings-section-header">
+        <div class="settings-section-icon si-plan"><i class="ti ti-sparkles"></i></div>
+        <div>
+          <div class="settings-section-title">Plan</div>
+          <div class="settings-section-sub">Your current subscription</div>
+        </div>
+        <span class="plan-badge-pill {% if is_pro %}pro{% else %}free{% endif %}">
+          {% if is_pro %}Pro{% else %}Free{% endif %}
+        </span>
+      </div>
+      <div class="settings-section-body">
+
+        {% if is_pro %}
+        <p style="font-size:13px;color:var(--text-2);margin-bottom:16px;line-height:1.6">
+          You're on the <strong>Pro plan</strong> — all features are unlocked.
+        </p>
+        {% if plan_cancel_at %}
+        <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--amber-bg);border:1px solid rgba(201,123,10,.2);border-radius:8px;margin-bottom:16px">
+          <i class="ti ti-clock" style="color:var(--amber);flex-shrink:0"></i>
+          <span style="font-size:12px;color:var(--amber)">
+            Your Pro access ends on <strong>{{ plan_cancel_at|date:"N j, Y" }}</strong>. After that you'll be moved to Free.
+          </span>
+        </div>
+        {% endif %}
+        <ul class="plan-features">
+          <li><i class="ti ti-check"></i> All 3 personas (Fan, Brand, Professional)</li>
+          <li><i class="ti ti-check"></i> Unlimited links per persona</li>
+          <li><i class="ti ti-check"></i> Media Kit Stats &amp; Brand Kit</li>
+          <li><i class="ti ti-check"></i> Platform stat cards on brand profile</li>
+          <li><i class="ti ti-check"></i> Priority support</li>
+        </ul>
+        <a href="{% url 'stripe_portal' %}" class="btn btn-ghost btn-sm" style="margin-top:4px">
+          <i class="ti ti-credit-card" style="font-size:12px"></i> Manage billing
+        </a>
+        {% else %}
+        <p style="font-size:13px;color:var(--text-2);margin-bottom:16px;line-height:1.6">
+          You're on the <strong>Free plan</strong>. Upgrade to unlock all personas and remove limits.
+        </p>
+        <ul class="plan-features">
+          <li><i class="ti ti-check"></i> Fan persona</li>
+          <li><i class="ti ti-check"></i> Up to 3 links</li>
+          <li class="locked"><i class="ti ti-lock"></i> Brand &amp; Professional personas</li>
+          <li class="locked"><i class="ti ti-lock"></i> Media Kit Stats &amp; Brand Kit</li>
+          <li class="locked"><i class="ti ti-lock"></i> Unlimited links</li>
+        </ul>
+        <a href="{% url 'pricing' %}" class="btn btn-primary btn-sm" style="margin-top:4px">
+          <i class="ti ti-sparkles" style="font-size:12px"></i> Upgrade to Pro
+        </a>
+        {% endif %}
+
+      </div>
+    </div>
+
+    <!-- ── Danger Zone ── -->
+    <div class="settings-section" style="border-color:rgba(217,48,37,.2)">
+      <div class="settings-section-header" style="border-color:rgba(217,48,37,.15)">
+        <div class="settings-section-icon si-danger"><i class="ti ti-alert-triangle"></i></div>
+        <div>
+          <div class="settings-section-title" style="color:var(--red)">Danger Zone</div>
+          <div class="settings-section-sub">Irreversible actions</div>
+        </div>
+      </div>
+      <div class="settings-section-body">
+        <p class="danger-desc">
+          Deleting your account permanently removes all your personas, links, and data.
+          This action cannot be undone.
+        </p>
+        <button class="btn-danger" onclick="openDeleteModal()">
+          <i class="ti ti-trash" style="font-size:13px;margin-right:4px"></i> Delete my account
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /page-body -->
+</div><!-- /main-wrap -->
+
+
+<!-- ════ DELETE CONFIRM MODAL ════ -->
+<div id="deleteModal" class="modal-overlay">
+  <div class="modal-box" style="max-width:420px">
+    <div class="modal-title" style="color:var(--red)">
+      <i class="ti ti-alert-triangle"></i> Delete account
+    </div>
+    <p class="delete-confirm-label">
+      This will permanently delete your account, all personas, and all links.
+      Type <strong>{{ profile.user.username }}</strong> to confirm.
+    </p>
+    <div class="form-group" style="margin-bottom:0">
+      <input id="deleteConfirmInput" class="form-input" type="text"
+        placeholder="{{ profile.user.username }}" autocomplete="off">
+    </div>
+    <div class="modal-footer" style="margin-top:16px">
+      <button class="btn btn-ghost" onclick="closeDeleteModal()">Cancel</button>
+      <button class="btn-danger" onclick="confirmDelete()">
+        <i class="ti ti-trash" style="font-size:13px;margin-right:4px"></i> Delete permanently
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Notification stack -->
+<div class="notif-stack" id="notifStack"></div>
+
+
+<!-- ════ SCRIPTS ════ -->
+<script>
+const CSRF = '{{ csrf_token }}';
+const CURRENT_USERNAME = '{{ profile.user.username }}';
+
+// ── Notifications ──
+const _NOTIF_ICONS = { success:'ti-check', error:'ti-alert-circle', info:'ti-info-circle', warn:'ti-alert-triangle' };
+function notify(msg, type = 'success', duration = 3500) {
+  const stack = document.getElementById('notifStack');
+  const el = document.createElement('div');
+  el.className = `notif notif-${type}`;
+  el.innerHTML = `
+    <div class="notif-icon"><i class="ti ${_NOTIF_ICONS[type] || 'ti-bell'}"></i></div>
+    <div class="notif-msg">${msg}</div>
+    <button class="notif-close" aria-label="Dismiss"><i class="ti ti-x"></i></button>
+  `;
+  stack.prepend(el);
+  const dismiss = () => { el.classList.add('notif-out'); el.addEventListener('animationend', () => el.remove(), { once: true }); };
+  const timer = setTimeout(dismiss, duration);
+  el.querySelector('.notif-close').addEventListener('click', () => { clearTimeout(timer); dismiss(); });
+}
+// Alias used throughout this page
+function toast(msg, isErr) { notify(msg, isErr ? 'error' : 'success'); }
+
+// ── Goal selector ──
+document.querySelectorAll('.goal-opt').forEach(opt => {
+  opt.addEventListener('click', () => {
+    document.querySelectorAll('.goal-opt').forEach(o => o.classList.remove('selected'));
+    opt.classList.add('selected');
+    opt.querySelector('input').checked = true;
+  });
+});
+
+// ── Username validation ──
+function validateUsername(val) {
+  const hint = document.getElementById('usernameHint');
+  const v = val.trim().toLowerCase();
+  if (!v || v === CURRENT_USERNAME) {
+    hint.className = 'username-hint info';
+    hint.textContent = 'Changing this changes your public link.';
+    return;
+  }
+  if (!/^[a-z0-9_]{3,30}$/.test(v)) {
+    hint.className = 'username-hint err';
+    hint.textContent = 'Use 3–30 characters: letters, numbers, or underscore only.';
+    return;
+  }
+  hint.className = 'username-hint ok';
+  hint.textContent = 'Looks good — your link will be prism.so/' + v;
+}
+
+// ── Avatar upload ──
+function uploadAvatar(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const form = new FormData();
+  form.append('avatar', file);
+  form.append('csrfmiddlewaretoken', CSRF);
+  fetch('/settings/avatar/', { method: 'POST', body: form })
+    .then(r => r.json())
+    .then(d => {
+      if (d.ok) {
+        const av = document.getElementById('settingsAv');
+        const init = document.getElementById('settingsAvInitial');
+        let img = document.getElementById('settingsAvImg');
+        if (!img) {
+          img = document.createElement('img');
+          img.id = 'settingsAvImg';
+          if (init) init.remove();
+          av.insertBefore(img, av.querySelector('.s-av-overlay'));
+        }
+        img.src = d.url;
+        toast('Photo updated');
+      } else {
+        toast(d.error || 'Upload failed', true);
+      }
+    })
+    .catch(() => toast('Upload failed', true));
+}
+
+// ── Save profile ──
+function saveProfile() {
+  const displayName = document.getElementById('displayName').value.trim();
+  const username    = document.getElementById('usernameField').value.trim().toLowerCase();
+  const goal        = document.querySelector('input[name="goal"]:checked')?.value || '';
+
+  fetch('/settings/profile/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+    body: JSON.stringify({ display_name: displayName, username, goal }),
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.ok) {
+      toast('Profile saved');
+      // Update URL hint if username changed
+      if (d.username !== CURRENT_USERNAME) {
+        const hint = document.getElementById('usernameHint');
+        hint.className = 'username-hint ok';
+        hint.textContent = 'Saved — your link is now prism.so/' + d.username;
+      }
+    } else {
+      toast(d.message || 'Save failed', true);
+    }
+  })
+  .catch(() => toast('Save failed', true));
+}
+
+// ── Change password ──
+function changePassword() {
+  const oldPw     = document.getElementById('oldPassword').value;
+  const newPw     = document.getElementById('newPassword').value;
+  const confirmPw = document.getElementById('confirmPassword').value;
+
+  if (!oldPw || !newPw || !confirmPw) { toast('Fill in all password fields', true); return; }
+  if (newPw !== confirmPw) { toast('New passwords do not match', true); return; }
+  if (newPw.length < 8)   { toast('New password must be at least 8 characters', true); return; }
+
+  fetch('/settings/password/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+    body: JSON.stringify({ old_password: oldPw, new_password: newPw, confirm_password: confirmPw }),
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.ok) {
+      toast('Password updated');
+      document.getElementById('oldPassword').value = '';
+      document.getElementById('newPassword').value = '';
+      document.getElementById('confirmPassword').value = '';
+    } else {
+      toast(d.message || 'Failed to update password', true);
+    }
+  })
+  .catch(() => toast('Request failed', true));
+}
+
+// ── Delete account ──
+function openDeleteModal()  { document.getElementById('deleteModal').classList.add('open'); }
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('open');
+  document.getElementById('deleteConfirmInput').value = '';
+}
+document.getElementById('deleteModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeDeleteModal();
+});
+
+function confirmDelete() {
+  const confirm = document.getElementById('deleteConfirmInput').value.trim();
+  fetch('/settings/delete/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+    body: JSON.stringify({ confirm }),
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.ok) {
+      window.location.href = '/';
+    } else {
+      toast(d.message || 'Confirmation did not match', true);
+    }
+  })
+  .catch(() => toast('Request failed', true));
+}
+</script>
+
+</body>
+</html>

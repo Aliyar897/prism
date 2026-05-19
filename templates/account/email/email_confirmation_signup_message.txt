@@ -1,0 +1,10 @@
+Hi there,
+
+Welcome to Prism! Click the link below to verify your email address and
+activate your account:
+
+{{ activate_url }}
+
+If you did not sign up for Prism, you can safely ignore this email.
+
+— The Prism Team

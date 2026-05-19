@@ -1,0 +1,213 @@
+:root {
+  --bg: #F7F5F0;
+  --surface: #FFFFFF;
+  --surface2: #F0EDE6;
+  --border: rgba(0,0,0,0.08);
+  --border-strong: rgba(0,0,0,0.14);
+  --text: #1A1814;
+  --text-2: #6B6760;
+  --text-3: #A09C97;
+  --accent: #5B47E0;
+  --accent-light: #EEF0FF;
+  --radius-sm: 8px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ── Layout ── */
+.auth-wrap {
+  min-height: 100vh;
+  display: flex;
+}
+
+.auth-left {
+  width: 420px;
+  flex-shrink: 0;
+  padding: 48px 52px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+}
+
+.auth-right {
+  flex: 1;
+  background: var(--accent-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+/* ── Logo ── */
+.auth-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.auth-logo-mark {
+  width: 32px;
+  height: 32px;
+  background: var(--accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  font-size: 16px;
+}
+
+.auth-logo-name {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+/* ── Headings ── */
+.auth-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 26px;
+  margin-bottom: 6px;
+}
+
+.auth-subtitle {
+  font-size: 14px;
+  color: var(--text-2);
+  margin-bottom: 28px;
+}
+
+/* ── Social button ── */
+.social-btn {
+  width: 100%;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin-bottom: 10px;
+  transition: background 0.15s;
+}
+
+.social-btn:hover { background: var(--surface2); }
+
+.social-icon { width: 18px; height: 18px; }
+
+/* ── Divider ── */
+.auth-divider,
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  color: var(--text-3);
+  font-size: 12px;
+}
+
+.auth-divider::before, .auth-divider::after,
+.divider::before, .divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── Form ── */
+.form-group { margin-bottom: 16px; }
+
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-2);
+  margin-bottom: 6px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  background: var(--surface);
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.form-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(91,71,224,0.1);
+}
+
+.form-input::placeholder { color: var(--text-3); }
+
+/* ── Primary button ── */
+.btn-primary {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+
+.btn-primary:hover {
+  background: #4a38c8;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(91,71,224,0.25);
+}
+
+/* ── Links ── */
+.auth-left a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.auth-left a:hover { text-decoration: underline; }
+
+.auth-switch {
+  font-size: 13px;
+  color: var(--text-2);
+  text-align: center;
+  margin-top: 20px;
+}
+
+/* ── Error messages ── */
+.error-msg {
+  background: #FEECEC;
+  color: #D94040;
+  border: 1px solid rgba(217,64,64,0.2);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-bottom: 14px;
+}

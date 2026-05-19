@@ -1,0 +1,866 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prism — Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <link rel="stylesheet" href="{% static 'accounts/css/dashboard.css' %}?v=2">
+  <link rel="icon" type="image/svg+xml" href="/static/accounts/favicon.svg">
+</head>
+<body>
+
+<!-- ════ SIDEBAR ════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-gem"><i class="ti ti-sparkles"></i></div>
+    <div class="logo-name">Prism</div>
+  </div>
+
+  <div class="sidebar-user">
+    <div class="user-av">
+      {% if profile.avatar %}<img src="{{ profile.avatar.url }}">
+      {% else %}{{ profile.user.username|first|upper }}{% endif %}
+    </div>
+    <div>
+      <div class="user-name">{{ display_name }}</div>
+      <div class="user-plan" style="{% if is_pro %}background:#EDE9FE;color:#6D28D9{% endif %}">{{ profile.plan|capfirst }}</div>
+    </div>
+  </div>
+
+  <div style="padding:6px 0;flex:1">
+    <div class="nav-section">Audience</div>
+    <div class="mode-nav fan-active" id="snav-fan" onclick="switchTab('fan')">
+      <div class="mode-dot" style="background:#FF6B6B"></div>
+      <i class="ti ti-heart" style="font-size:15px"></i> Fans
+      <span class="mode-status-dot {% if personas.fan.is_active %}active{% endif %}" id="sdot-fan"></span>
+    </div>
+    <div class="mode-nav {% if not is_pro %}mode-nav-locked{% endif %}" id="snav-brand" onclick="switchTab('brand')">
+      <div class="mode-dot" style="background:#635BFF"></div>
+      <i class="ti ti-briefcase" style="font-size:15px"></i> Brands
+      {% if is_pro %}
+        <span class="mode-status-dot {% if personas.brand.is_active %}active{% endif %}" id="sdot-brand"></span>
+      {% else %}
+        <i class="ti ti-lock" style="font-size:11px;margin-left:auto;opacity:0.4"></i>
+      {% endif %}
+    </div>
+    <div class="mode-nav" style="opacity:.45;cursor:default" title="Coming soon">
+      <div class="mode-dot" style="background:#0EA5E9"></div>
+      <i class="ti ti-user-check" style="font-size:15px"></i> Professional
+      <span style="font-size:10px;margin-left:auto;color:var(--text-3);font-weight:600">Soon</span>
+    </div>
+
+    <div class="nav-divider"></div>
+    <div class="nav-section">Workspace</div>
+    <div class="nav-item active"><i class="ti ti-layout-dashboard"></i> Dashboard</div>
+    <div class="nav-item" style="opacity:.5;cursor:default" title="Coming soon"><i class="ti ti-chart-line"></i> Analytics</div>
+    <div class="nav-item" style="opacity:.5;cursor:default" title="Coming soon"><i class="ti ti-sparkles"></i> AI Insights</div>
+    <a href="{% url 'settings' %}" class="nav-item" style="text-decoration:none;color:inherit"><i class="ti ti-settings"></i> Settings</a>
+    <div class="nav-item" onclick="openFeedback()" style="cursor:pointer"><i class="ti ti-message-circle"></i> Feedback</div>
+    <div class="nav-divider"></div>
+    <form method="POST" action="{% url 'account_logout' %}" style="margin:0">
+      {% csrf_token %}
+      <button type="submit" class="nav-item" style="width:100%;color:var(--red);background:none;border:none;cursor:pointer;font-family:inherit;font-size:inherit;text-align:left;">
+        <i class="ti ti-logout"></i> Sign out
+      </button>
+    </form>
+  </div>
+
+  <div class="sidebar-bottom">
+    {% if is_pro %}
+    <div class="upgrade-box" style="background:linear-gradient(135deg,#1E1B4B 0%,#2D1B69 100%)">
+      <div class="upgrade-box-title">✦ Pro plan active</div>
+      <div class="upgrade-box-desc">All features unlocked. Thanks for supporting Prism.</div>
+    </div>
+    {% else %}
+    <div class="upgrade-box">
+      <div class="upgrade-box-title">⚡ Upgrade to Pro</div>
+      <div class="upgrade-box-desc">All 3 personas, unlimited links &amp; full Brand Kit.</div>
+      <a href="{% url 'pricing' %}" class="upgrade-box-btn">See plans</a>
+    </div>
+    {% endif %}
+  </div>
+</aside>
+
+<!-- ════ MAIN ════ -->
+<div class="main-wrap">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="breadcrumb">Dashboard → <strong>{{ profile.user.username }}</strong></div>
+      <a href="{% url 'public_profile' profile.user.username %}" target="_blank" class="topbar-url">
+        <i class="ti ti-lock"></i>
+        prism.so/{{ profile.user.username }}
+        <i class="ti ti-external-link" style="font-size:11px;margin-left:2px"></i>
+      </a>
+    </div>
+    <div class="topbar-actions">
+      <div class="live-badge"><div class="live-dot"></div> Live</div>
+      <a href="{% url 'public_profile' profile.user.username %}" target="_blank" class="btn btn-primary btn-sm">
+        <i class="ti ti-eye" style="font-size:13px"></i> View page
+      </a>
+    </div>
+  </div>
+
+  <!-- PAGE BODY -->
+  <div class="page-body">
+
+    <!-- HEADER -->
+    <div class="page-header">
+      <div>
+        <div class="page-title">Your Personas</div>
+        <div class="page-sub">Each audience sees a different version of you. Configure each below.</div>
+      </div>
+    </div>
+
+    <!-- PERSONA MODE TABS -->
+    <div class="persona-tab-bar">
+
+      <button class="persona-tab pt-fan active" id="ptab-fan" onclick="switchTab('fan')">
+        <i class="ti ti-heart"></i> Fans
+        <span class="ptab-status {% if personas.fan.is_active %}on{% endif %}" id="pstatus-fan">
+          {% if personas.fan.is_active %}Live{% else %}Off{% endif %}
+        </span>
+      </button>
+
+      <button class="persona-tab pt-brand {% if not is_pro %}ptab-locked{% endif %}"
+              id="ptab-brand" onclick="switchTab('brand')">
+        <i class="ti ti-briefcase"></i> Brands
+        {% if is_pro %}
+          <span class="ptab-status {% if personas.brand.is_active %}on{% endif %}" id="pstatus-brand">
+            {% if personas.brand.is_active %}Live{% else %}Off{% endif %}
+          </span>
+        {% else %}
+          <span class="ptab-lock"><i class="ti ti-lock"></i> Pro</span>
+        {% endif %}
+      </button>
+
+      <button class="persona-tab pt-pro" style="opacity:.45;cursor:default" disabled title="Coming soon">
+        <i class="ti ti-user-check"></i> Professional
+        <span class="ptab-lock" style="background:rgba(0,0,0,0.06);color:var(--text-3)">Soon</span>
+      </button>
+
+    </div>
+
+    <!-- CONTENT GRID -->
+    <div class="content-grid">
+      <div>
+
+        <!-- ── FAN PANEL ── -->
+        <div class="persona-panel" id="panel-fan">
+          {% include "accounts/partials/persona_panel.html" with persona=personas.fan mode="fan" mode_label="Fan" color="#FF6B6B" is_pro=is_pro %}
+        </div>
+
+        <!-- ── BRAND PANEL ── -->
+        <div class="persona-panel" id="panel-brand" style="display:none">
+          {% include "accounts/partials/persona_panel.html" with persona=personas.brand mode="brand" mode_label="Brand" color="#635BFF" is_pro=is_pro %}
+        </div>
+
+        <!-- ── PROFESSIONAL PANEL ── -->
+        <div class="persona-panel" id="panel-professional" style="display:none">
+          {% include "accounts/partials/persona_panel.html" with persona=personas.professional mode="professional" mode_label="Professional" color="#0EA5E9" is_pro=is_pro %}
+        </div>
+
+      </div>
+
+      <!-- RIGHT — VISITING CARD PREVIEW -->
+      <div class="preview-panel">
+        <div class="preview-header">
+          <div class="preview-title">Card preview</div>
+          <div class="live-badge"><div class="live-dot"></div> Live</div>
+        </div>
+
+        <!-- Actual card preview — matches profile.html exactly -->
+        <div class="vcard" id="preview-vcard">
+          <div class="vcard-inner">
+
+            <!-- Horizontal header: small avatar left + name/mode right -->
+            <div class="vcard-head">
+              <div class="vcard-av" id="vcard-av">
+                {% if personas.fan.avatar %}
+                  <img src="{{ personas.fan.avatar.url }}">
+                {% else %}
+                  {{ display_name|first|upper }}
+                {% endif %}
+              </div>
+              <div class="vcard-id">
+                <div class="vcard-name" id="vcard-name">{{ display_name }}</div>
+                <div class="vcard-role" id="vcard-role" style="color:#D4423D">{{ personas.fan.cta_label|default:"Fan mode"|upper }}</div>
+              </div>
+            </div>
+
+            <!-- Bio -->
+            <div class="vcard-bio-wrap" id="vcard-bio-wrap"
+                 {% if not personas.fan.bio %}style="display:none"{% endif %}>
+              <div class="vcard-bio" id="vcard-bio">{{ personas.fan.bio }}</div>
+            </div>
+
+            <!-- Links -->
+            <div class="vcard-links" id="vcard-links">
+              {% for link in personas.fan.links.all %}
+                {% if link.is_enabled %}
+                  <div class="vcard-link">
+                    <span class="vcard-link-ico"><i class="ti ti-link"></i></span>
+                    <span class="vcard-link-label">{{ link.label }}</span>
+                    <i class="ti ti-chevron-right vcard-link-arr"></i>
+                  </div>
+                {% endif %}
+              {% empty %}
+                <div class="vcard-empty">
+                  <i class="ti ti-link-off"></i><span>Add links to get started</span>
+                </div>
+              {% endfor %}
+            </div>
+
+            <!-- Footer -->
+            <div class="vcard-footer">
+              <span class="vcard-footer-brand">
+                <span style="display:inline-flex;align-items:center;justify-content:center;width:13px;height:13px;background:#635BFF;border-radius:3px;margin-right:4px;flex-shrink:0">
+                  <i class="ti ti-sparkles" style="font-size:8px;color:#fff;line-height:1"></i>
+                </span>
+                Prism
+              </span>
+              <span class="vcard-footer-handle">prism.so/{{ profile.user.username }}</span>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /content-grid -->
+
+  </div><!-- /page-body -->
+</div><!-- /main-wrap -->
+
+
+<!-- ════ NOTIFICATION STACK ════ -->
+<div class="notif-stack" id="notifStack"></div>
+
+<!-- ════ UPGRADE MODAL ════ -->
+<div id="upgradeModal" class="modal-overlay">
+  <div class="modal-box" style="text-align:center;padding:32px 28px">
+    <div style="font-size:32px;margin-bottom:12px">⚡</div>
+    <div class="modal-title" style="justify-content:center;font-size:18px" id="upgradeModalTitle">Pro Feature</div>
+    <p id="upgradeModalDesc" style="font-size:13px;color:var(--text-2);line-height:1.6;margin:8px 0 24px"></p>
+    <div class="modal-footer" style="justify-content:center;gap:12px">
+      <button class="btn btn-ghost" onclick="closeUpgradeModal()">Maybe later</button>
+      <a href="{% url 'pricing' %}" class="btn btn-primary">See plans →</a>
+    </div>
+  </div>
+</div>
+
+<!-- ════ LINK MODAL ════ -->
+<div id="linkModal" class="modal-overlay">
+  <div class="modal-box">
+    <div class="modal-title"><i class="ti ti-link"></i><span id="modalTitle">Add link</span></div>
+    <div class="form-group">
+      <label class="form-label">Label</label>
+      <input id="linkLabel" class="form-input" type="text" placeholder="e.g. My YouTube channel">
+    </div>
+    <div class="form-group">
+      <label class="form-label">URL</label>
+      <input id="linkUrl" class="form-input" type="url" placeholder="https://...">
+    </div>
+    <div class="form-group" style="display:flex;align-items:center;gap:10px;">
+      <input type="checkbox" id="linkIsCta" style="width:16px;height:16px;accent-color:var(--accent)">
+      <label for="linkIsCta" style="font-size:13px;color:var(--text-2);cursor:pointer">
+        Make this the primary CTA button
+      </label>
+    </div>
+    <div id="statFields" style="display:none">
+      <div style="padding:12px 0 0;border-top:1px solid #F0F0F0;margin-top:4px">
+        <div style="font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#AAA;margin-bottom:10px">Social stats — shown on brand card</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div class="form-group" style="margin:0">
+            <label class="form-label">Value <span style="color:#BBB;font-weight:400">(e.g. 48K)</span></label>
+            <input id="linkStatValue" class="form-input" type="text" placeholder="e.g. 48K" maxlength="20">
+          </div>
+          <div class="form-group" style="margin:0">
+            <label class="form-label">Label</label>
+            <input id="linkStatLabel" class="form-input" type="text" placeholder="e.g. Subscribers" maxlength="30">
+          </div>
+        </div>
+      </div>
+    </div>
+    <input type="hidden" id="linkId">
+    <input type="hidden" id="linkMode">
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()"><i class="ti ti-x"></i> Cancel</button>
+      <button class="btn btn-primary" onclick="saveLink()"><i class="ti ti-check"></i> Save link</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════ SCRIPTS ════ -->
+<script>
+const CSRF = '{{ csrf_token }}';
+const USERNAME = '{{ profile.user.username }}';
+const INITIAL = '{{ display_name|first|upper }}';
+const PERSONAS = {{ personas_json|safe }};
+const IS_PRO = {{ is_pro|yesno:'true,false' }};
+const FREE_LINK_LIMIT = 3;
+
+function showUpgradeModal(title, desc) {
+  document.getElementById('upgradeModalTitle').textContent = title;
+  document.getElementById('upgradeModalDesc').textContent = desc;
+  document.getElementById('upgradeModal').classList.add('open');
+}
+function closeUpgradeModal() { document.getElementById('upgradeModal').classList.remove('open'); }
+document.getElementById('upgradeModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeUpgradeModal(); });
+
+const MODE_META = {
+  fan:          { label:'Fan',          badge:'Fan',          headerBg:'linear-gradient(150deg,#1a0a0a 0%,#3d0c0c 45%,#6b1a1a 100%)', dot:'#FF6B6B' },
+  brand:        { label:'Brands',       badge:'Brand',        headerBg:'linear-gradient(150deg,#0f0c2e 0%,#1e1b4b 45%,#2d1b69 100%)', dot:'#635BFF' },
+  professional: { label:'Professional', badge:'Professional', headerBg:'linear-gradient(150deg,#04111c 0%,#0a2540 45%,#0c3460 100%)', dot:'#0EA5E9' },
+};
+
+let currentMode = 'fan';
+
+/* ── Tab switching ── */
+function switchTab(mode) {
+  if (mode === 'professional') return; // coming soon
+  if (!IS_PRO && mode !== 'fan') {
+    const titles = { brand: 'Brand Persona — Pro', professional: 'Professional Persona — Pro' };
+    const descs  = {
+      brand:        'The Brand persona lets you showcase audience stats, collaboration formats, and past brand partners. Upgrade to Pro to unlock it.',
+      professional: 'The Professional persona shows your work experience, skills, and hiring links to recruiters and employers. Upgrade to Pro to unlock it.',
+    };
+    showUpgradeModal(titles[mode], descs[mode]);
+    return;
+  }
+
+  currentMode = mode;
+
+  // Panels
+  document.querySelectorAll('.persona-panel').forEach(p => p.style.display = 'none');
+  document.getElementById('panel-' + mode).style.display = '';
+
+  // Top tabs
+  document.querySelectorAll('.persona-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('ptab-' + mode).classList.add('active');
+
+  // Sidebar navs
+  document.querySelectorAll('.mode-nav').forEach(n => n.classList.remove('fan-active','brand-active','pro-active'));
+  const cls = { fan:'fan-active', brand:'brand-active', professional:'pro-active' }[mode];
+  document.getElementById('snav-' + mode).classList.add(cls);
+
+  // Preview card
+  updateCard(mode);
+}
+
+/* ── Update visiting card preview ── */
+const MODE_ROLE_COLOR = {
+  fan:          '#D4423D',
+  brand:        '#4F46E5',
+  professional: '#1B6AC9',
+};
+const MODE_ROLE_LABEL = {
+  fan:          'Fan mode',
+  brand:        'Brand mode',
+  professional: 'Professional mode',
+};
+
+function updateCard(mode) {
+  const p    = PERSONAS[mode] || {};
+  const color = MODE_ROLE_COLOR[mode];
+
+  // Avatar
+  const av = document.getElementById('vcard-av');
+  if (p.avatar) {
+    av.innerHTML = `<img src="${p.avatar}">`;
+  } else {
+    av.textContent = INITIAL;
+  }
+
+  // Name + role (CTA label if set, otherwise mode label)
+  document.getElementById('vcard-name').textContent = document.querySelector('.user-name')?.textContent || USERNAME;
+  const roleEl = document.getElementById('vcard-role');
+  roleEl.textContent = (p.cta_label || MODE_ROLE_LABEL[mode]).toUpperCase();
+  roleEl.style.color = color;
+
+  // Bio
+  const bioWrap = document.getElementById('vcard-bio-wrap');
+  const bioEl   = document.getElementById('vcard-bio');
+  if (p.bio) {
+    bioEl.textContent = p.bio;
+    bioWrap.style.display = '';
+  } else {
+    bioWrap.style.display = 'none';
+  }
+
+  // Links
+  const container = document.getElementById('vcard-links');
+  const links = (p.links || []).filter(l => l.is_enabled);
+  if (links.length === 0) {
+    container.innerHTML = `<div class="vcard-empty"><i class="ti ti-link-off"></i><span>Add links to get started</span></div>`;
+  } else {
+    container.innerHTML = links.slice(0, 5).map(l => `
+      <div class="vcard-link">
+        <span class="vcard-link-ico" style="background:${color}18;color:${color}"><i class="ti ti-link"></i></span>
+        <span class="vcard-link-label">${escHtml(l.label)}</span>
+        <i class="ti ti-chevron-right vcard-link-arr"></i>
+      </div>`).join('');
+  }
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ── Avatar upload ── */
+function triggerAvatarUpload(mode) {
+  const inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = 'image/*';
+  inp.onchange = async () => {
+    const file = inp.files[0]; if (!file) return;
+    const fd = new FormData();
+    fd.append('avatar', file); fd.append('mode', mode);
+    const r = await fetch("{% url 'persona_upload_avatar' %}", { method:'POST', headers:{'X-CSRFToken':CSRF}, body:fd });
+    const d = await r.json();
+    if (d.success) {
+      PERSONAS[mode].avatar = d.url;
+      document.getElementById('av-preview-' + mode).innerHTML =
+        `<img src="${d.url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+      if (mode === currentMode) updateCard(mode);
+    }
+  };
+  inp.click();
+}
+
+/* ── Bio save ── */
+async function saveBio(mode) {
+  const bio = document.getElementById('bio-' + mode).value.trim();
+  const cta = document.getElementById('cta-' + mode)?.value.trim() || '';
+  const r = await fetch("{% url 'persona_save_bio' %}", {
+    method:'POST',
+    headers:{'X-CSRFToken':CSRF,'Content-Type':'application/json'},
+    body: JSON.stringify({mode, bio, cta_label: cta})
+  });
+  if ((await r.json()).success) {
+    PERSONAS[mode].bio = bio;
+    if (mode === currentMode) updateCard(mode);
+    notify('Bio saved');
+  }
+}
+
+/* ── Toggle persona active ── */
+async function togglePersonaActive(mode, checkbox) {
+  const active = checkbox.checked;
+  const r = await fetch("{% url 'persona_toggle_active' %}", {
+    method:'POST',
+    headers:{'X-CSRFToken':CSRF,'Content-Type':'application/json'},
+    body: JSON.stringify({mode, active})
+  });
+  const d = await r.json();
+  if (r.status === 402) {
+    checkbox.checked = !checkbox.checked; // revert toggle
+    showUpgradeModal('Multiple Personas', d.message);
+    return;
+  }
+  if (d.success) {
+    PERSONAS[mode].is_active = active;
+    const pill = document.getElementById('pstatus-' + mode);
+    pill.textContent = active ? 'Live' : 'Off';
+    pill.classList.toggle('on', active);
+    const dot = document.getElementById('sdot-' + mode);
+    dot.classList.toggle('active', active);
+  }
+}
+
+/* ── Link modal ── */
+const STAT_LABEL_MAP = {
+  youtube:'Subscribers', instagram:'Followers', tiktok:'Followers',
+  twitter:'Followers', x:'Followers', spotify:'Monthly Listeners',
+  facebook:'Followers', linkedin:'Connections', github:'Stars', pinterest:'Followers'
+};
+function defaultStatLabel(label) {
+  const l = (label || '').toLowerCase();
+  for (const [k, v] of Object.entries(STAT_LABEL_MAP)) { if (l.includes(k)) return v; }
+  return 'Followers';
+}
+
+function openLinkModal(mode, id, label, url, isCta, statValue, statLabel) {
+  document.getElementById('linkMode').value = mode;
+  document.getElementById('linkId').value = id || '';
+  document.getElementById('linkLabel').value = label || '';
+  document.getElementById('linkUrl').value = url || '';
+  document.getElementById('linkIsCta').checked = !!isCta;
+  document.getElementById('linkStatValue').value = statValue || '';
+  document.getElementById('linkStatLabel').value = statLabel || (label ? defaultStatLabel(label) : '');
+  document.getElementById('modalTitle').textContent = id ? 'Edit link' : 'Add link';
+  document.getElementById('statFields').style.display = mode === 'brand' ? '' : 'none';
+  document.getElementById('linkModal').classList.add('open');
+  setTimeout(() => document.getElementById('linkLabel').focus(), 60);
+}
+
+/* Auto-suggest stat label when user types the link label */
+document.getElementById('linkLabel').addEventListener('input', function() {
+  const mode = document.getElementById('linkMode').value;
+  if (mode !== 'brand') return;
+  const curLabel = document.getElementById('linkStatLabel').value.trim();
+  const suggested = defaultStatLabel(this.value);
+  if (!curLabel || Object.values(STAT_LABEL_MAP).includes(curLabel) || curLabel === 'Followers') {
+    document.getElementById('linkStatLabel').value = suggested;
+  }
+});
+
+function closeModal() { document.getElementById('linkModal').classList.remove('open'); }
+document.getElementById('linkModal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+async function saveLink() {
+  const mode       = document.getElementById('linkMode').value;
+  const id         = document.getElementById('linkId').value;
+  const label      = document.getElementById('linkLabel').value.trim();
+  const url        = document.getElementById('linkUrl').value.trim();
+  const is_cta     = document.getElementById('linkIsCta').checked;
+  const stat_value = document.getElementById('linkStatValue').value.trim();
+  const stat_label = document.getElementById('linkStatLabel').value.trim();
+
+  if (!label) { document.getElementById('linkLabel').focus(); return; }
+  if (!url)   { document.getElementById('linkUrl').focus(); return; }
+
+  const r = await fetch("{% url 'persona_save_link' %}", {
+    method:'POST',
+    headers:{'X-CSRFToken':CSRF,'Content-Type':'application/json'},
+    body: JSON.stringify({mode, id: id || null, label, url, is_cta, stat_value, stat_label})
+  });
+  const d = await r.json();
+  if (r.status === 402) {
+    closeModal();
+    showUpgradeModal(d.feature === 'link_limit' ? 'Link Limit Reached' : 'Pro Feature', d.message);
+    return;
+  }
+  if (d.success) {
+    closeModal();
+    sessionStorage.setItem('prism_active_tab', mode);
+    location.reload();
+  }
+}
+
+/* ── Toggle link ── */
+async function toggleLink(id, checkbox) {
+  const enabled = checkbox.checked;
+  await fetch("{% url 'persona_toggle_link' %}", {
+    method:'POST',
+    headers:{'X-CSRFToken':CSRF,'Content-Type':'application/json'},
+    body: JSON.stringify({id, enabled})
+  });
+  // update PERSONAS cache
+  for (const m in PERSONAS) {
+    const lnk = (PERSONAS[m].links || []).find(l => l.id == id);
+    if (lnk) { lnk.is_enabled = enabled; break; }
+  }
+  if (currentMode) updateCard(currentMode);
+}
+
+/* ── Delete link — inline confirmation ── */
+const _deletePending = {};
+
+function deleteLink(id) {
+  const row = document.getElementById('link-row-' + id);
+  if (!row) return;
+  const actions = row.querySelector('.link-actions');
+
+  // Already showing confirm prompt — prevent double-click opening
+  if (_deletePending[id]) return;
+  _deletePending[id] = actions.innerHTML;
+
+  actions.innerHTML = `
+    <div class="link-delete-confirm">
+      <span>Delete?</span>
+      <button class="act-btn" onclick="cancelDeleteLink(${id})">Cancel</button>
+      <button class="act-btn danger" onclick="confirmDeleteLink(${id})">Delete</button>
+    </div>
+  `;
+}
+
+function cancelDeleteLink(id) {
+  const row = document.getElementById('link-row-' + id);
+  if (row && _deletePending[id]) row.querySelector('.link-actions').innerHTML = _deletePending[id];
+  delete _deletePending[id];
+}
+
+async function confirmDeleteLink(id) {
+  const r = await fetch("{% url 'persona_delete_link' %}", {
+    method:'POST',
+    headers:{'X-CSRFToken':CSRF,'Content-Type':'application/json'},
+    body: JSON.stringify({id})
+  });
+  const d = await r.json();
+  if (d.success) {
+    sessionStorage.setItem('prism_active_tab', currentMode);
+    location.reload();
+  } else {
+    notify('Could not delete link', 'error');
+    cancelDeleteLink(id);
+  }
+}
+
+/* ── Media Kit Stats save ── */
+async function saveMediaKitStats() {
+  const inputs = document.querySelectorAll('.metric-stat-input');
+  const payload = {};
+  inputs.forEach(inp => {
+    const key = inp.dataset.metricKey;
+    const val = inp.value.trim();
+    if (key) payload[key] = val;
+  });
+  const r = await fetch("{% url 'persona_save_brand_metrics' %}", {
+    method: 'POST',
+    headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const d = await r.json();
+  if (r.status === 402) { showUpgradeModal('Media Kit Stats', d.message); return; }
+  if (d.success) {
+    if (!PERSONAS.brand) PERSONAS.brand = {};
+    PERSONAS.brand.brand_metrics = payload;
+    notify('Media kit stats saved');
+  }
+}
+
+/* ── Brand kit save ── */
+async function saveBrandKit() {
+  const niche_tags  = document.getElementById('brandNicheTags')?.value.trim() || '';
+  const past_brands = document.getElementById('brandPastBrands')?.value.trim() || '';
+  const collab_types = Array.from(document.querySelectorAll('.brand-collab-check:checked'))
+                            .map(cb => cb.value);
+  const r = await fetch("{% url 'persona_save_brand_info' %}", {
+    method: 'POST',
+    headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ niche_tags, collab_types, past_brands })
+  });
+  const d = await r.json();
+  if (r.status === 402) {
+    showUpgradeModal('Brand Kit — Pro Feature', d.message);
+    return;
+  }
+  if (d.success) {
+    if (!PERSONAS.brand) PERSONAS.brand = {};
+    PERSONAS.brand.niche_tags   = niche_tags.split(',').map(t => t.trim()).filter(Boolean);
+    PERSONAS.brand.collab_types = collab_types;
+    PERSONAS.brand.past_brands  = past_brands.split(',').map(b => b.trim()).filter(Boolean);
+    if (currentMode === 'brand') updateCard('brand');
+    notify('Brand kit saved');
+  }
+}
+
+/* ── AI bio generator ── */
+function toggleAiPanel(mode) {
+  const panel = document.getElementById('ai-panel-' + mode);
+  const isOpen = panel.classList.contains('open');
+  panel.classList.toggle('open', !isOpen);
+  if (!isOpen) {
+    setTimeout(() => document.getElementById('ai-desc-' + mode)?.focus(), 280);
+  }
+}
+
+async function generateBio(mode, useDescription = false) {
+  const descEl  = document.getElementById('ai-desc-' + mode);
+  const description = useDescription ? (descEl?.value || '').trim() : '';
+  const genBtn  = document.getElementById('ai-gen-btn-' + mode);
+  const genIcon = document.getElementById('ai-gen-icon-' + mode);
+  const genLbl  = document.getElementById('ai-gen-label-' + mode);
+  const area    = document.getElementById('bio-' + mode);
+
+  if (genBtn) { genBtn.disabled = true; genBtn.style.opacity = '0.6'; }
+  if (genIcon) genIcon.textContent = '⏳';
+  if (genLbl)  genLbl.textContent = 'Generating...';
+
+  try {
+    const r = await fetch("{% url 'persona_generate_bio' %}", {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+      body: JSON.stringify({ mode, description }),
+    });
+    const d = await r.json();
+    if (d.ok) {
+      area.value = d.bio;
+      area.style.transition = 'background .3s';
+      area.style.background = '#F3F0FF';
+      setTimeout(() => area.style.background = '', 800);
+      // Close the panel and reset
+      document.getElementById('ai-panel-' + mode).classList.remove('open');
+      if (descEl) descEl.value = '';
+      notify('Bio generated');
+    } else {
+      notify('AI error: ' + (d.error || 'unknown'), 'error');
+    }
+  } catch {
+    notify('Request failed', 'error');
+  } finally {
+    if (genBtn) { genBtn.disabled = false; genBtn.style.opacity = '1'; }
+    if (genIcon) genIcon.textContent = '★';
+    if (genLbl)  genLbl.textContent = 'Generate';
+  }
+}
+
+/* ── Restore active tab after page reload (save / delete link) ── */
+(function () {
+  const saved = sessionStorage.getItem('prism_active_tab');
+  if (saved && ['fan', 'brand', 'professional'].includes(saved)) {
+    sessionStorage.removeItem('prism_active_tab');
+    if (IS_PRO || saved === 'fan') switchTab(saved);
+  }
+})();
+
+/* ── Notification system ── */
+const _NOTIF_ICONS = {
+  success: 'ti-check',
+  error:   'ti-alert-circle',
+  info:    'ti-info-circle',
+  warn:    'ti-alert-triangle',
+};
+
+function notify(msg, type = 'success', duration = 3500) {
+  const stack = document.getElementById('notifStack');
+  const el = document.createElement('div');
+  el.className = `notif notif-${type}`;
+  el.innerHTML = `
+    <div class="notif-icon"><i class="ti ${_NOTIF_ICONS[type] || 'ti-bell'}"></i></div>
+    <div class="notif-msg">${msg}</div>
+    <button class="notif-close" aria-label="Dismiss"><i class="ti ti-x"></i></button>
+  `;
+  stack.prepend(el);
+
+  const dismiss = () => {
+    el.classList.add('notif-out');
+    el.addEventListener('animationend', () => el.remove(), { once: true });
+  };
+  const timer = setTimeout(dismiss, duration);
+  el.querySelector('.notif-close').addEventListener('click', () => { clearTimeout(timer); dismiss(); });
+}
+
+/* Keep showToast as alias so any missed calls still work */
+function showToast(msg) { notify(msg, 'success'); }
+</script>
+
+<!-- ── Feedback Modal ── -->
+<style>
+  .fb-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(4px); z-index: 1000;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity .2s;
+  }
+  .fb-overlay.open { opacity: 1; pointer-events: auto; }
+  .fb-modal {
+    background: #fff; border-radius: 18px; padding: 28px;
+    width: 100%; max-width: 420px; margin: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+    transform: translateY(12px) scale(0.98);
+    transition: transform .25s cubic-bezier(0.22,1,0.36,1);
+  }
+  .fb-overlay.open .fb-modal { transform: none; }
+  .fb-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .fb-title { font-size: 16px; font-weight: 700; color: var(--text); }
+  .fb-close { background: none; border: none; cursor: pointer; color: var(--text-3); font-size: 20px; padding: 2px; line-height: 1; }
+  .fb-close:hover { color: var(--text); }
+  .fb-sub { font-size: 13px; color: var(--text-3); margin-bottom: 20px; }
+  .fb-emoji-row { display: flex; gap: 8px; margin-bottom: 18px; }
+  .fb-emoji {
+    flex: 1; padding: 10px 6px; border-radius: 10px;
+    border: 1.5px solid var(--border); background: none;
+    font-size: 20px; cursor: pointer; transition: all .15s;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+  }
+  .fb-emoji span { font-size: 10px; color: var(--text-3); font-weight: 500; }
+  .fb-emoji:hover { border-color: var(--accent); background: rgba(99,91,255,0.05); }
+  .fb-emoji.selected { border-color: var(--accent); background: rgba(99,91,255,0.08); }
+  .fb-emoji.selected span { color: var(--accent); }
+  .fb-textarea {
+    width: 100%; min-height: 90px; resize: vertical;
+    border: 1.5px solid var(--border); border-radius: 10px;
+    padding: 10px 12px; font-size: 13px; font-family: inherit;
+    color: var(--text); background: var(--bg); outline: none;
+    transition: border-color .15s; margin-bottom: 16px; box-sizing: border-box;
+  }
+  .fb-textarea:focus { border-color: var(--accent); }
+  .fb-footer { display: flex; align-items: center; justify-content: space-between; }
+  .fb-hint { font-size: 11px; color: var(--text-3); }
+  .fb-send {
+    padding: 9px 22px; background: var(--accent); color: #fff;
+    border: none; border-radius: 8px; font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: inherit; transition: background .15s, transform .15s;
+  }
+  .fb-send:hover { background: #4F48D6; transform: translateY(-1px); }
+  .fb-send:disabled { opacity: .5; cursor: default; transform: none; }
+</style>
+
+<div class="fb-overlay" id="fbOverlay" onclick="if(event.target===this)closeFeedback()">
+  <div class="fb-modal">
+    <div class="fb-header">
+      <div class="fb-title"><i class="ti ti-message-circle" style="color:var(--accent);margin-right:6px"></i>Send feedback</div>
+      <button class="fb-close" onclick="closeFeedback()"><i class="ti ti-x"></i></button>
+    </div>
+    <p class="fb-sub">How is your experience with Prism so far?</p>
+
+    <div class="fb-emoji-row">
+      <button class="fb-emoji" data-rating="😍" onclick="selectRating(this)">😍<span>Love it</span></button>
+      <button class="fb-emoji" data-rating="🙂" onclick="selectRating(this)">🙂<span>Good</span></button>
+      <button class="fb-emoji" data-rating="😐" onclick="selectRating(this)">😐<span>Okay</span></button>
+      <button class="fb-emoji" data-rating="😕" onclick="selectRating(this)">😕<span>Needs work</span></button>
+    </div>
+
+    <textarea id="fbText" class="fb-textarea" placeholder="Tell us what you think — bugs, missing features, ideas, anything..."></textarea>
+
+    <div class="fb-footer">
+      <span class="fb-hint">Replies go to your email</span>
+      <button class="fb-send" id="fbSend" onclick="submitFeedback()">
+        <i class="ti ti-send" style="font-size:12px"></i> Send
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+let _fbRating = '';
+
+function openFeedback() {
+  document.getElementById('fbOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('fbText').focus(), 250);
+}
+function closeFeedback() {
+  document.getElementById('fbOverlay').classList.remove('open');
+}
+function selectRating(el) {
+  document.querySelectorAll('.fb-emoji').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  _fbRating = el.dataset.rating;
+}
+
+async function submitFeedback() {
+  const text = document.getElementById('fbText').value.trim();
+  if (!text && !_fbRating) { document.getElementById('fbText').focus(); return; }
+  const btn = document.getElementById('fbSend');
+  btn.disabled = true; btn.innerHTML = 'Sending…';
+
+  try {
+    const res = await fetch('{% url "submit_feedback" %}', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+      body: JSON.stringify({ rating: _fbRating, message: text })
+    });
+    if (res.ok) {
+      closeFeedback();
+      notify('Thanks for your feedback! 🙏', 'success');
+      document.getElementById('fbText').value = '';
+      _fbRating = '';
+      document.querySelectorAll('.fb-emoji').forEach(b => b.classList.remove('selected'));
+    } else {
+      notify('Could not send — please try again.', 'error');
+    }
+  } catch(e) {
+    notify('Could not send — please try again.', 'error');
+  }
+  btn.disabled = false; btn.innerHTML = '<i class="ti ti-send" style="font-size:12px"></i> Send';
+}
+</script>
+
+</body>
+</html>

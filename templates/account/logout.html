@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signing out — Prism</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #F5F3EF;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .wrap {
+      text-align: center;
+      color: #6B6760;
+      font-size: 14px;
+    }
+    .logo {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1A1814;
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+    .spinner {
+      width: 28px; height: 28px;
+      border: 2.5px solid #E5E2DC;
+      border-top-color: #4F46E5;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto 14px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="logo">✦ Prism</div>
+    <div class="spinner"></div>
+    <p>Signing you out…</p>
+  </div>
+
+  <!-- Auto-submit immediately — no ugly confirmation needed -->
+  <form id="logoutForm" method="POST" action="{% url 'account_logout' %}">
+    {% csrf_token %}
+  </form>
+
+  <script>
+    document.getElementById('logoutForm').submit();
+  </script>
+</body>
+</html>

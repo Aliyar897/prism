@@ -1,0 +1,379 @@
+{% load static %}
+<!-- Persona panel for mode={{ mode }} -->
+
+<!-- ── Active toggle + header ── -->
+<div class="persona-header">
+  <div>
+    <div class="persona-header-title" style="color:{{ color }}">
+      {{ mode_label }} persona
+    </div>
+    <div class="persona-header-sub">
+      Configure what {{ mode_label|lower }} visitors see when they land on your page.
+    </div>
+  </div>
+  <label class="active-toggle" title="Make this persona live">
+    <input type="checkbox" id="active-{{ mode }}"
+      {% if persona.is_active %}checked{% endif %}
+      onchange="togglePersonaActive('{{ mode }}', this)">
+    <span class="at-track"></span>
+    <span class="at-label">
+      {% if persona.is_active %}Live{% else %}Off{% endif %}
+    </span>
+  </label>
+</div>
+
+<!-- ── Profile row: avatar + bio ── -->
+<div class="card persona-profile-row">
+
+  <!-- Avatar -->
+  <div class="persona-av-wrap" onclick="triggerAvatarUpload('{{ mode }}')">
+    <div class="persona-av" id="av-preview-{{ mode }}">
+      {% if persona.avatar %}
+        <img src="{{ persona.avatar.url }}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+      {% else %}
+        <i class="ti ti-camera" style="font-size:22px;color:var(--text-3)"></i>
+      {% endif %}
+    </div>
+    <div class="persona-av-hint">Photo for<br>{{ mode_label }} mode</div>
+  </div>
+
+  <!-- Bio + CTA label -->
+  <div style="flex:1">
+    <div class="form-group" style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <label class="form-label" style="margin-bottom:0">Bio for {{ mode_label }} visitors</label>
+        <button type="button"
+          onclick="toggleAiPanel('{{ mode }}')"
+          id="gen-btn-{{ mode }}"
+          style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;
+                 color:#7C3AED;background:#EDE9FE;border:none;border-radius:6px;
+                 padding:4px 10px;cursor:pointer;transition:opacity .15s">
+          ★ Generate with AI
+        </button>
+      </div>
+      <textarea id="bio-{{ mode }}" class="form-input" rows="3"
+        placeholder="Write a bio tailored to {{ mode_label|lower }} visitors...">{{ persona.bio }}</textarea>
+
+      <!-- AI generation panel (animates open/closed) -->
+      <div id="ai-panel-{{ mode }}" class="ai-gen-panel">
+        <div style="background:#F9F7FF;border:1px solid #E9E3FF;border-radius:10px;padding:12px">
+        <div style="font-size:12px;font-weight:600;color:#7C3AED;margin-bottom:6px">★ Generate with AI</div>
+        <p style="font-size:11px;color:var(--text-2);margin-bottom:10px;line-height:1.5">
+          Optionally describe yourself — the more you share, the better the result. Or leave blank to use your profile data.
+        </p>
+        <textarea id="ai-desc-{{ mode }}" class="form-input" rows="2"
+          style="font-size:12px;margin-bottom:10px"
+          placeholder="e.g. I'm a fitness creator who makes home workout videos for busy parents..."></textarea>
+        <div style="display:flex;align-items:center;gap:8px">
+          <button class="btn btn-primary btn-sm" onclick="generateBio('{{ mode }}', true)" id="ai-gen-btn-{{ mode }}">
+            <span id="ai-gen-icon-{{ mode }}">★</span>
+            <span id="ai-gen-label-{{ mode }}">Generate</span>
+          </button>
+          <button class="btn btn-ghost btn-sm" onclick="generateBio('{{ mode }}', false)" style="font-size:11px;color:var(--text-3)">
+            Quick — use my profile only
+          </button>
+          <button class="btn btn-ghost btn-sm" onclick="toggleAiPanel('{{ mode }}')" style="margin-left:auto;font-size:11px">
+            Cancel
+          </button>
+        </div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label class="form-label">Primary CTA label <span style="color:var(--text-3);font-weight:400">(optional)</span></label>
+      <input id="cta-{{ mode }}" class="form-input" type="text"
+        placeholder="e.g. Book a call / Follow me / Download kit"
+        value="{{ persona.cta_label }}">
+    </div>
+    <div style="display:flex;justify-content:flex-end">
+      <button class="btn btn-primary btn-sm" onclick="saveBio('{{ mode }}')">
+        <i class="ti ti-check" style="font-size:12px"></i> Save
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Links ── -->
+<div class="card" style="margin-top:16px">
+  <div class="card-header">
+    <div class="card-title">
+      Links
+      <span class="mode-pill mp-{{ mode }}">{{ mode_label }} mode</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      {% if not is_pro %}
+        {% if persona.links.count > 3 %}
+          <span style="font-size:11px;color:var(--red);font-weight:600">{{ persona.links.count }}/3 — limit reached</span>
+        {% else %}
+          <span style="font-size:11px;color:var(--text-3)">{{ persona.links.count }}/3 links</span>
+        {% endif %}
+      {% endif %}
+      <button class="btn btn-primary btn-sm" onclick="openLinkModal('{{ mode }}', null, '', '', false, '', '')">
+        <i class="ti ti-plus" style="font-size:13px"></i> Add link
+      </button>
+    </div>
+  </div>
+
+  {% for link in persona.links.all %}
+  <div class="link-item" id="link-row-{{ link.id }}">
+    <div class="link-icon">
+      {% if link.is_cta %}
+        <i class="ti ti-star" style="color:#C97B0A"></i>
+      {% elif "youtube" in link.label|lower %}
+        <i class="ti ti-brand-youtube" style="color:#FF0000"></i>
+      {% elif "instagram" in link.label|lower %}
+        <i class="ti ti-brand-instagram" style="color:#E1306C"></i>
+      {% elif "tiktok" in link.label|lower %}
+        <i class="ti ti-brand-tiktok"></i>
+      {% elif "twitter" in link.label|lower or "x" == link.label|lower %}
+        <i class="ti ti-brand-twitter" style="color:#1DA1F2"></i>
+      {% elif "spotify" in link.label|lower %}
+        <i class="ti ti-brand-spotify" style="color:#1DB954"></i>
+      {% elif "linkedin" in link.label|lower %}
+        <i class="ti ti-brand-linkedin" style="color:#0077B5"></i>
+      {% else %}
+        <i class="ti ti-link"></i>
+      {% endif %}
+    </div>
+    <div class="link-info">
+      <div class="link-name">
+        {{ link.label }}
+        {% if link.is_cta %}<span class="cta-badge">CTA</span>{% endif %}
+      </div>
+      {% if link.url %}
+        <div class="link-url">{{ link.url|truncatechars:48 }}</div>
+      {% else %}
+        <div class="link-url missing"><i class="ti ti-alert-circle" style="font-size:11px"></i> URL missing</div>
+      {% endif %}
+    </div>
+    <div class="link-actions">
+      <button class="act-btn" onclick="openLinkModal('{{ mode }}', {{ link.id }}, '{{ link.label|escapejs }}', '{{ link.url|escapejs }}', {{ link.is_cta|yesno:'true,false' }}, '{{ link.stat_value|escapejs }}', '{{ link.stat_label|escapejs }}')">
+        <i class="ti ti-pencil"></i>
+      </button>
+      <button class="act-btn danger" onclick="deleteLink({{ link.id }})">
+        <i class="ti ti-trash"></i>
+      </button>
+      <input type="checkbox" class="c-toggle" id="tog-{{ link.id }}"
+        data-id="{{ link.id }}"
+        {% if link.is_enabled %}checked{% endif %}
+        onchange="toggleLink({{ link.id }}, this)">
+      <label for="tog-{{ link.id }}" class="c-toggle-label"></label>
+    </div>
+  </div>
+  {% empty %}
+  <div class="empty-state">
+    <i class="ti ti-link-off"></i>
+    <p>No links yet for {{ mode_label }} mode.<br>Add your first link above.</p>
+  </div>
+  {% endfor %}
+
+  <div class="add-link-row" onclick="openLinkModal('{{ mode }}', null, '', '', false, '', '')">
+    <i class="ti ti-plus-circle"></i>
+    <span>Add another link</span>
+  </div>
+</div>
+
+<!-- ── Media Kit Stats (brand mode only) ── -->
+{% if mode == 'brand' %}
+<div class="card" style="margin-top:16px;position:relative">
+  <div class="card-header">
+    <div class="card-title">
+      Media Kit Stats
+      <span class="mode-pill mp-brand">Shown on brand card</span>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="saveMediaKitStats()">
+      <i class="ti ti-check" style="font-size:12px"></i> Save
+    </button>
+  </div>
+
+  <div style="padding:0 20px 20px">
+    <p style="font-size:12px;color:var(--text-3);margin-bottom:16px;line-height:1.5">
+      Fill in only the stats you want brands to see. Empty fields are hidden on your card.
+    </p>
+
+    <div style="margin-bottom:18px">
+      <div class="metrics-category-header">👥 Audience</div>
+      <div class="metrics-input-grid">
+        {% for f in brand_metric_fields %}{% if f.category == 'audience' %}
+        <div class="metric-input-cell">
+          <label class="form-label" style="margin-bottom:4px">{{ f.label }}</label>
+          <input class="form-input metric-stat-input" type="text"
+                 data-metric-key="{{ f.key }}" placeholder="{{ f.placeholder }}"
+                 value="{{ f.value }}">
+        </div>
+        {% endif %}{% endfor %}
+      </div>
+    </div>
+
+    <div style="margin-bottom:18px">
+      <div class="metrics-category-header">🔥 Engagement & Performance</div>
+      <div class="metrics-input-grid">
+        {% for f in brand_metric_fields %}{% if f.category == 'performance' %}
+        <div class="metric-input-cell">
+          <label class="form-label" style="margin-bottom:4px">{{ f.label }}</label>
+          <input class="form-input metric-stat-input" type="text"
+                 data-metric-key="{{ f.key }}" placeholder="{{ f.placeholder }}"
+                 value="{{ f.value }}">
+        </div>
+        {% endif %}{% endfor %}
+      </div>
+    </div>
+
+    <div style="margin-bottom:18px">
+      <div class="metrics-category-header">📈 Growth</div>
+      <div class="metrics-input-grid">
+        {% for f in brand_metric_fields %}{% if f.category == 'growth' %}
+        <div class="metric-input-cell">
+          <label class="form-label" style="margin-bottom:4px">{{ f.label }}</label>
+          <input class="form-input metric-stat-input" type="text"
+                 data-metric-key="{{ f.key }}" placeholder="{{ f.placeholder }}"
+                 value="{{ f.value }}">
+        </div>
+        {% endif %}{% endfor %}
+      </div>
+    </div>
+
+    <div>
+      <div class="metrics-category-header">💼 Business Results</div>
+      <div class="metrics-input-grid">
+        {% for f in brand_metric_fields %}{% if f.category == 'results' %}
+        <div class="metric-input-cell">
+          <label class="form-label" style="margin-bottom:4px">{{ f.label }}</label>
+          <input class="form-input metric-stat-input" type="text"
+                 data-metric-key="{{ f.key }}" placeholder="{{ f.placeholder }}"
+                 value="{{ f.value }}">
+        </div>
+        {% endif %}{% endfor %}
+      </div>
+    </div>
+  </div>
+
+  {% if not is_pro %}
+  <div class="plan-lock-overlay">
+    <div class="plan-lock-inner">
+      <span class="plan-lock-icon">📊</span>
+      <strong class="plan-lock-title">Pro feature</strong>
+      <p class="plan-lock-desc">Media Kit Stats let you showcase engagement rate, avg views, audience age, growth rate, and more — the numbers brands actually look at before signing a deal.</p>
+      <a href="{% url 'pricing' %}" class="btn btn-primary btn-sm">Unlock with Pro</a>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- ── Auto Stats (coming soon) ── -->
+<div class="card" style="margin-top:16px;border:1.5px dashed rgba(99,91,255,0.3);background:rgba(99,91,255,0.03)">
+  <div class="card-header" style="padding-bottom:0">
+    <div class="card-title" style="display:flex;align-items:center;gap:8px">
+      <i class="ti ti-sparkles" style="color:#635BFF;font-size:15px"></i>
+      Auto Stats
+      <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+                   background:rgba(99,91,255,0.12);color:#635BFF;border:1px solid rgba(99,91,255,0.25);
+                   border-radius:20px;padding:2px 10px">Coming soon</span>
+    </div>
+  </div>
+  <div style="padding:16px 20px 20px">
+    <p style="font-size:13px;color:var(--text-2);line-height:1.6;margin-bottom:18px">
+      Link your social profiles once — Prism will automatically pull and combine your real-time stats across every platform into a single, always-up-to-date media kit.
+    </p>
+
+    <!-- Platform rows (non-interactive preview) -->
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;opacity:0.55;pointer-events:none">
+      {% for row in auto_stat_preview %}
+      <div style="display:flex;align-items:center;gap:10px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 14px">
+        <i class="{{ row.icon }}" style="font-size:18px;color:{{ row.color }};width:22px;text-align:center"></i>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600;color:var(--text)">{{ row.label }}</div>
+          <div style="font-size:11px;color:var(--text-3)">{{ row.hint }}</div>
+        </div>
+        <div style="font-size:12px;color:var(--text-3);background:var(--surface2);border-radius:6px;padding:3px 10px">
+          Add profile URL
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Combined stat preview chips -->
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;opacity:0.45;pointer-events:none">
+      <div style="display:flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text-2)">
+        <i class="ti ti-users" style="font-size:13px"></i> Total reach: <strong style="color:var(--text)">—</strong>
+      </div>
+      <div style="display:flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text-2)">
+        <i class="ti ti-chart-bar" style="font-size:13px"></i> Avg engagement: <strong style="color:var(--text)">—</strong>
+      </div>
+      <div style="display:flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--text-2)">
+        <i class="ti ti-trending-up" style="font-size:13px"></i> Combined growth: <strong style="color:var(--text)">—</strong>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-3)">
+      <i class="ti ti-lock" style="font-size:13px;color:#635BFF"></i>
+      We never store your passwords — read-only access via public APIs only.
+      <span style="margin-left:auto;font-size:11px;font-weight:600;color:#635BFF;cursor:default">Notify me when live →</span>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Brand Kit section (brand mode only) -->
+{% if mode == 'brand' %}
+<div class="card" style="margin-top:16px;position:relative">
+  <div class="card-header">
+    <div class="card-title">
+      Brand Kit
+      <span class="mode-pill mp-brand">Shown on brand card</span>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="saveBrandKit()">
+      <i class="ti ti-check" style="font-size:12px"></i> Save
+    </button>
+  </div>
+  <div style="padding:0 20px 20px">
+
+    <div class="form-group" style="margin-bottom:16px">
+      <label class="form-label">Content niche / categories</label>
+      <input id="brandNicheTags" class="form-input" type="text"
+             placeholder="e.g. Tech, Gaming, Fitness, Lifestyle"
+             value="{{ persona.niche_tags|join:', ' }}">
+      <div style="font-size:11px;color:var(--text-3);margin-top:4px">Shown as pills beside your name. Keep it to 4–5 tags.</div>
+    </div>
+
+    <div class="form-group" style="margin-bottom:16px">
+      <label class="form-label">Collaboration formats you offer</label>
+      <div class="collab-type-grid">
+        {% for ct in collab_type_choices %}
+        <label class="collab-type-opt">
+          <input type="checkbox" class="brand-collab-check" value="{{ ct }}"
+                 {% if ct in persona.collab_types %}checked{% endif %}>
+          <span>{{ ct }}</span>
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom:0">
+      <label class="form-label">Past brand partners <span style="color:var(--text-3);font-weight:400">(social proof)</span></label>
+      <input id="brandPastBrands" class="form-input" type="text"
+             placeholder="e.g. Nike, Apple, Samsung, Adidas"
+             value="{{ persona.past_brands|join:', ' }}">
+      <div style="font-size:11px;color:var(--text-3);margin-top:4px">Scrollable strip on your brand card. Up to 12 brands.</div>
+    </div>
+
+  </div>
+
+  {% if not is_pro %}
+  <div class="plan-lock-overlay">
+    <div class="plan-lock-inner">
+      <span class="plan-lock-icon">⚡</span>
+      <strong class="plan-lock-title">Pro feature</strong>
+      <p class="plan-lock-desc">Brand Kit is available on Prism Pro — showcase your niche, collab formats, and past brand partners to land better deals.</p>
+      <a href="{% url 'pricing' %}" class="btn btn-primary btn-sm">Unlock with Pro</a>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
+<!-- Smart link hint -->
+<div class="smart-link-hint">
+  <i class="ti ti-info-circle"></i>
+  Share <strong>prism.so/{{ request.user.username }}?ref={{ mode }}</strong> to always show this persona.
+</div>

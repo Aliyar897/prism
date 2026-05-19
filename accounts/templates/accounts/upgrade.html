@@ -1,0 +1,277 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prism — Upgrade to Pro</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Serif+Display&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #09090B;
+      --surface:   #111113;
+      --surface2:  #18181B;
+      --border:    rgba(255,255,255,0.07);
+      --border-md: rgba(255,255,255,0.12);
+      --text:      #FAFAFA;
+      --text-2:    #A1A1AA;
+      --text-3:    #52525B;
+      --accent:    #635BFF;
+      --accent-dk: #4F48D6;
+      --indigo-dk: #1E1B4B;
+      --green:     #4ade80;
+    }
+
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px;
+    }
+
+    a { text-decoration: none; color: inherit; }
+
+    .card {
+      background: var(--surface);
+      border: 1.5px solid var(--border-md);
+      border-radius: 24px;
+      padding: 48px 44px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(99,91,255,0.08);
+    }
+
+    .upgrade-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #C4B5FD;
+      background: rgba(139,92,246,0.15);
+      border: 1px solid rgba(139,92,246,0.3);
+      border-radius: 20px;
+      padding: 4px 14px;
+      margin-bottom: 24px;
+    }
+
+    .card-title {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 30px;
+      font-weight: 400;
+      line-height: 1.2;
+      margin-bottom: 10px;
+    }
+
+    .card-sub {
+      font-size: 14px;
+      color: var(--text-2);
+      margin-bottom: 32px;
+      line-height: 1.6;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin-bottom: 28px;
+    }
+
+    .what-you-get {
+      margin-bottom: 28px;
+    }
+
+    .wug-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-3);
+      margin-bottom: 16px;
+    }
+
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+    }
+
+    .feature-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .feat-icon {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: rgba(74,222,128,0.12);
+      color: var(--green);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 28px;
+      padding: 20px 24px;
+      background: rgba(99,91,255,0.07);
+      border: 1px solid rgba(99,91,255,0.2);
+      border-radius: 14px;
+    }
+
+    .price-amount {
+      font-family: 'DM Serif Display', Georgia, serif;
+      font-size: 40px;
+      font-weight: 400;
+      line-height: 1;
+    }
+
+    .price-sup {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      align-self: flex-start;
+      margin-top: 8px;
+    }
+
+    .price-period {
+      font-size: 13px;
+      color: var(--text-2);
+    }
+
+    form { margin: 0; }
+
+    .btn-upgrade {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 16px 24px;
+      border-radius: 12px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      font-family: inherit;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(99,91,255,0.4);
+      transition: background 0.18s, transform 0.18s, box-shadow 0.18s;
+      margin-bottom: 16px;
+    }
+
+    .btn-upgrade:hover {
+      background: var(--accent-dk);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(99,91,255,0.5);
+    }
+
+    .stripe-note {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-3);
+      margin-bottom: 28px;
+    }
+
+    .stripe-note i { font-size: 14px; color: var(--text-3); }
+
+    .back-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      font-size: 13px;
+      color: var(--text-2);
+      transition: color 0.15s;
+    }
+
+    .back-link:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <div class="upgrade-badge">⚡ Pro upgrade</div>
+
+  <div class="card-title">You're upgrading to Prism Pro</div>
+  <div class="card-sub">
+    Everything you need to turn your link-in-bio into a smart creator platform — for fans, brands, and hiring managers.
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="what-you-get">
+    <div class="wug-label">What you unlock</div>
+    <ul class="feature-list">
+      <li>
+        <div class="feat-icon"><i class="ti ti-check"></i></div>
+        All 3 personas active simultaneously (Fan, Brand, Professional)
+      </li>
+      <li>
+        <div class="feat-icon"><i class="ti ti-check"></i></div>
+        Unlimited links per persona
+      </li>
+      <li>
+        <div class="feat-icon"><i class="ti ti-check"></i></div>
+        Full Brand Kit — niche tags, collab formats, and past brand partners
+      </li>
+      <li>
+        <div class="feat-icon"><i class="ti ti-check"></i></div>
+        Audience stats on links — subscriber counts and engagement rates
+      </li>
+      <li>
+        <div class="feat-icon"><i class="ti ti-check"></i></div>
+        Priority support and early access to new features
+      </li>
+    </ul>
+  </div>
+
+  <div class="price-row">
+    <span class="price-sup">$</span>
+    <span class="price-amount">9</span>
+    <span class="price-period">/ month &nbsp;·&nbsp; cancel anytime</span>
+  </div>
+
+  <form method="POST" action="{% url 'upgrade' %}">
+    {% csrf_token %}
+    <button type="submit" class="btn-upgrade">
+      <i class="ti ti-bolt"></i> Confirm upgrade
+    </button>
+  </form>
+
+  <div class="stripe-note">
+    <i class="ti ti-lock"></i>
+    Secure payment powered by Stripe (coming soon)
+  </div>
+
+  <a href="{% url 'pricing' %}" class="back-link">
+    <i class="ti ti-arrow-left" style="font-size:14px"></i> Back to pricing
+  </a>
+</div>
+
+</body>
+</html>
